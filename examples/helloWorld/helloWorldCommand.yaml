@@ -1,0 +1,12 @@
+SlashCommand: print 
+  Description: "Prints the things you want"
+  Arguments: [{
+    name: "text",
+    type: "quotedText",
+    description: "text you want to display",
+    Position: 1,
+    Required: True,
+    shortSwitch: "-t",
+    longSwitch: "--text" 
+  }]
+  ParseErrorMessage: "Invalid Command. Plese run ```/print help``` for more information"

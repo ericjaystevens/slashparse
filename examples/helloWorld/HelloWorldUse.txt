@@ -1,0 +1,17 @@
+> /print help
+
+Print: "Prints the things you want"
+
+/print "text"
+
+Options:
+
+Text: -t,--text
+
+> /print "Hello World!"
+
+Hello World!
+
+> /print foo
+
+Invalid Command. Please run ```/print help``` for more information
