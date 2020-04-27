@@ -1,10 +1,10 @@
 package slashparse
 
 import (
-	"fmt"
 	"log"
 
 	"gopkg.in/yaml.v2"
+	"io/ioutil"
 )
 
 type Slashdef struct {
@@ -15,24 +15,37 @@ type Slashdef struct {
 	}
 }
 
-var data = `
-a: Easy!
-b:
-  c: 2
-  d: [3, 4]
-`
+type SlashCommand struct {
+	name string
+}
+
+type Slash interface {
+	GetSlashHelp() string
+}
 
 //NewSlashCommand define a new slash command to parse
-func NewSlashCommand(args []string, pathToYaml string) string {
+func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
 
 	m := make(map[interface{}]interface{})
 
-	err := yaml.Unmarshal([]byte(data), &m)
+	slashDef, yamlerr := ioutil.ReadFile(pathToYaml)
+	if yamlerr != nil {
+		return SlashCommand{}
+	}
+
+	err := yaml.Unmarshal([]byte(slashDef), &m)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	slashCmd := args[0]
-	val := m["a"]
-	return fmt.Sprintf("works on %s so %v", slashCmd, val)
+	val, _ := m["a"].(string)
+
+	slashCommand := SlashCommand{
+		name: val,
+	}
+	return  slashCommand
+}
+
+func (s *SlashCommand) GetSlashHelp() string {
+	return s.name
 }
