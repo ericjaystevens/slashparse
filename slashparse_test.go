@@ -10,7 +10,7 @@ import (
 // - [x] parse yaml from file
 // - [ ] Print Help
 // 	- [x] Print command name
-//  - [ ] Give Yaml usefull names 
+//  - [x] Give Yaml usefull names 
 // - [ ] newSlashCommand should return errors
 
 func TestNewSlashCommand(t *testing.T) {
@@ -22,6 +22,7 @@ func TestNewSlashCommand(t *testing.T) {
 
 	want := SlashCommand{
 		name: "Print",
+		description:"Echos back what you type.",
 	}
 	assert.Equal(t, want, newSlash)
 }
@@ -35,7 +36,11 @@ func TestGetSlashHelp(t *testing.T){
 
 	got := newSlash.GetSlashHelp()
 
-	want := "Print"
+	want := `## Print Help
+* Echos back what you type. *
+
+### Arguments
+`
 
 	assert.Equal(t, want, got)
 }

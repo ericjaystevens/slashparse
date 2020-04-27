@@ -8,7 +8,8 @@ import (
 )
 
 type Slashdef struct {
-	A string
+	name string
+	description string
 	B struct {
 		RenamedC int   `yaml:"c"`
 		D        []int `yaml:",flow"`
@@ -17,6 +18,7 @@ type Slashdef struct {
 
 type SlashCommand struct {
 	name string
+	description string
 }
 
 type Slash interface {
@@ -38,14 +40,23 @@ func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
 		log.Fatalf("error: %v", err)
 	}
 
-	val, _ := m["a"].(string)
+	val, _ := m["name"].(string)
+	desc, _ := m["description"].(string)
 
 	slashCommand := SlashCommand{
 		name: val,
+		description: desc,
 	}
 	return  slashCommand
 }
 
 func (s *SlashCommand) GetSlashHelp() string {
-	return s.name
+	
+	header := "## " + s.name + " Help"
+	
+	description := "* " + s.description + " *"
+
+	arguments := "### Arguments"
+
+	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
