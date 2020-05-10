@@ -1,5 +1,6 @@
+---
 name: Print
 description: Echos back what you type.
-b:
-  c: 2
-  d: [3, 4]
+arguments:
+    - name: text
+      description: text you want to print

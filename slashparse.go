@@ -10,15 +10,21 @@ import (
 type Slashdef struct {
 	name string
 	description string
-	B struct {
-		RenamedC int   `yaml:"c"`
-		D        []int `yaml:",flow"`
+	arguments struct {
+		name string 
+		description string
 	}
 }
 
+type Argument struct {
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+}
+
 type SlashCommand struct {
-	name string
-	description string
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+	Arguments   []Argument `yaml:"arguments"`
 }
 
 type Slash interface {
@@ -28,35 +34,42 @@ type Slash interface {
 //NewSlashCommand define a new slash command to parse
 func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
 
-	m := make(map[interface{}]interface{})
-
+	//m := make(map[interface{}]interface{})
+	s := SlashCommand{}
 	slashDef, yamlerr := ioutil.ReadFile(pathToYaml)
 	if yamlerr != nil {
 		return SlashCommand{}
 	}
 
-	err := yaml.Unmarshal([]byte(slashDef), &m)
+	err := yaml.Unmarshal([]byte(slashDef), &s)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+	//m.Name
+	//val, _ := m["Name"].(string)
+	//desc, _ := m["Description"].(string)
 
-	val, _ := m["name"].(string)
-	desc, _ := m["description"].(string)
-
-	slashCommand := SlashCommand{
-		name: val,
-		description: desc,
-	}
-	return  slashCommand
+//	slashCommand := SlashCommand{
+	//	Name: val,
+	//	Description: desc,
+	//	Arguments: m["Arguments"].(),
+	//}
+	return s //slashCommand
 }
 
 func (s *SlashCommand) GetSlashHelp() string {
 	
-	header := "## " + s.name + " Help"
+	header := "## " + s.Name + " Help"
 	
-	description := "* " + s.description + " *"
+	description := "* " + s.Description + " *"
 
 	arguments := "### Arguments"
+
+	//for each argument in arguments print name.
+	for _, argument := range s.Arguments {
+		arguments += "\n\n* " + argument.Name + ": " + argument.Description
+	}	
+	
 
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }

@@ -9,4 +9,4 @@ SlashCommand: print
     shortSwitch: "-t",
     longSwitch: "--text" 
   }]
-  ParseErrorMessage: "Invalid Command. Plese run ```/print help``` for more information"
+  ParseErrorMessage: "Invalid Command. Please run ```/print help``` for more information"
