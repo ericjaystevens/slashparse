@@ -3,15 +3,16 @@ package slashparse
 import (
 	"log"
 
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Slashdef struct {
-	name string
+	name        string
 	description string
-	arguments struct {
-		name string 
+	arguments   struct {
+		name        string
 		description string
 	}
 }
@@ -22,8 +23,8 @@ type Argument struct {
 }
 
 type SlashCommand struct {
-	Name        string `yaml:"name"`
-	Description string `yaml:"description"`
+	Name        string     `yaml:"name"`
+	Description string     `yaml:"description"`
 	Arguments   []Argument `yaml:"arguments"`
 }
 
@@ -49,7 +50,7 @@ func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
 	//val, _ := m["Name"].(string)
 	//desc, _ := m["Description"].(string)
 
-//	slashCommand := SlashCommand{
+	//	slashCommand := SlashCommand{
 	//	Name: val,
 	//	Description: desc,
 	//	Arguments: m["Arguments"].(),
@@ -58,9 +59,9 @@ func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
 }
 
 func (s *SlashCommand) GetSlashHelp() string {
-	
+
 	header := "## " + s.Name + " Help"
-	
+
 	description := "* " + s.Description + " *"
 
 	arguments := "### Arguments"
@@ -68,8 +69,11 @@ func (s *SlashCommand) GetSlashHelp() string {
 	//for each argument in arguments print name.
 	for _, argument := range s.Arguments {
 		arguments += "\n\n* " + argument.Name + ": " + argument.Description
-	}	
-	
+	}
 
 	return header + "\n" + description + "\n\n" + arguments + "\n"
+}
+
+func (s *SlashCommand) GetCommandString() string {
+	return "print"
 }
