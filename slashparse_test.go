@@ -44,9 +44,10 @@ func TestGetSlashHelp(t *testing.T) {
 }
 
 type getCommandStringTests struct {
-	testName string
-	args     []string
-	want     string
+	testName    string
+	args        []string
+	want        string
+	expectError bool
 }
 
 func TestGetCommandString(t *testing.T) {
@@ -57,9 +58,10 @@ func TestGetCommandString(t *testing.T) {
 			want:     "Print",
 		},
 		{
-			testName: "invalid print example",
-			args:     []string{""},
-			want:     "",
+			testName:    "invalid print example",
+			args:        []string{""},
+			want:        "",
+			expectError: true,
 		},
 	}
 
@@ -67,8 +69,12 @@ func TestGetCommandString(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			testYamlPath := "./examples/helloWorld/simple.yaml"
 			newSlash := NewSlashCommand(test.args, testYamlPath)
-			got := newSlash.GetCommandString(test.args)
-			assert.Equal(t, test.want, got)
+			got, err := newSlash.GetCommandString(test.args)
+			if err != nil {
+				assert.Equal(t, test.expectError, true)
+			} else {
+				assert.Equal(t, test.want, got)
+			}
 		})
 	}
 }

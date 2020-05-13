@@ -75,16 +75,16 @@ func (s *SlashCommand) GetSlashHelp() string {
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-func (s *SlashCommand) GetCommandString(args []string) string {
+func (s *SlashCommand) GetCommandString(args []string) (commandString string, err error) {
 	if len(args) < 0 {
-		return ""
+		return "", err
 	}
 
 	command := strings.Replace(args[0], "/", "", 1)
 
 	if strings.EqualFold(command, s.Name) {
-		return s.Name
+		return s.Name, nil
 	}
 
-	return ""
+	return "", err
 }
