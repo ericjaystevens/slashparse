@@ -54,11 +54,11 @@ func TestGetCommandString(t *testing.T) {
 		{
 			testName: "valid print example",
 			args:     []string{"/print"},
-			want:     "print",
+			want:     "Print",
 		},
 		{
 			testName: "invalid print example",
-			args:     []string{"/print"},
+			args:     []string{""},
 			want:     "",
 		},
 	}
@@ -67,7 +67,7 @@ func TestGetCommandString(t *testing.T) {
 		t.Run(test.testName, func(t *testing.T) {
 			testYamlPath := "./examples/helloWorld/simple.yaml"
 			newSlash := NewSlashCommand(test.args, testYamlPath)
-			got := newSlash.GetCommandString()
+			got := newSlash.GetCommandString(test.args)
 			assert.Equal(t, test.want, got)
 		})
 	}

@@ -2,6 +2,7 @@ package slashparse
 
 import (
 	"log"
+	"strings"
 
 	"io/ioutil"
 
@@ -74,6 +75,16 @@ func (s *SlashCommand) GetSlashHelp() string {
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-func (s *SlashCommand) GetCommandString() string {
-	return "print"
+func (s *SlashCommand) GetCommandString(args []string) string {
+	if len(args) < 0 {
+		return ""
+	}
+
+	command := strings.Replace(args[0], "/", "", 1)
+
+	if strings.EqualFold(command, s.Name) {
+		return s.Name
+	}
+
+	return ""
 }
