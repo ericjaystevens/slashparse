@@ -1,7 +1,6 @@
 package slashparse
 
 import (
-	"log"
 	"strings"
 
 	"io/ioutil"
@@ -34,29 +33,20 @@ type Slash interface {
 }
 
 //NewSlashCommand define a new slash command to parse
-func NewSlashCommand(args []string, pathToYaml string) SlashCommand {
+func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err error) {
 
 	//m := make(map[interface{}]interface{})
-	s := SlashCommand{}
-	slashDef, yamlerr := ioutil.ReadFile(pathToYaml)
-	if yamlerr != nil {
-		return SlashCommand{}
+	slashDef, yamlErr := ioutil.ReadFile(pathToYaml)
+	if yamlErr != nil {
+		return s, yamlErr
 	}
 
-	err := yaml.Unmarshal([]byte(slashDef), &s)
-	if err != nil {
-		log.Fatalf("error: %v", err)
+	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
+	if unmarshalErr != nil {
+		return s, unmarshalErr
 	}
-	//m.Name
-	//val, _ := m["Name"].(string)
-	//desc, _ := m["Description"].(string)
 
-	//	slashCommand := SlashCommand{
-	//	Name: val,
-	//	Description: desc,
-	//	Arguments: m["Arguments"].(),
-	//}
-	return s //slashCommand
+	return s, nil
 }
 
 func (s *SlashCommand) GetSlashHelp() string {

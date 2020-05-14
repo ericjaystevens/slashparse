@@ -6,30 +6,46 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type newSlashCommandTests struct {
+	testName   string
+	args       []string
+	want       SlashCommand
+	configPath string
+}
+
 func TestNewSlashCommand(t *testing.T) {
-	testYamlPath := "./examples/helloWorld/simple.yaml"
-
-	args := []string{"/print"}
-	newSlash := NewSlashCommand(args, testYamlPath)
-
-	want := SlashCommand{
-		Name:        "Print",
-		Description: "Echos back what you type.",
-		Arguments: []Argument{
-			{
-				Name:        "text",
-				Description: "text you want to print",
+	tests := []newSlashCommandTests{
+		{
+			testName:   "simple test",
+			args:       []string{"/print"},
+			configPath: "./examples/helloWorld/simple.yaml",
+			want: SlashCommand{
+				Name:        "Print",
+				Description: "Echos back what you type.",
+				Arguments: []Argument{
+					{
+						Name:        "text",
+						Description: "text you want to print",
+					},
+				},
 			},
 		},
 	}
-	assert.Equal(t, want, newSlash)
+
+	for _, test := range tests {
+		newSlash, err := NewSlashCommand(test.args, test.configPath)
+		if err != nil {
+			return
+		}
+		assert.Equal(t, test.want, newSlash)
+	}
 }
 
 func TestGetSlashHelp(t *testing.T) {
 	testYamlPath := "./examples/helloWorld/simple.yaml"
 
 	args := []string{"/print"}
-	newSlash := NewSlashCommand(args, testYamlPath)
+	newSlash, _ := NewSlashCommand(args, testYamlPath)
 
 	got := newSlash.GetSlashHelp()
 
@@ -68,7 +84,7 @@ func TestGetCommandString(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			testYamlPath := "./examples/helloWorld/simple.yaml"
-			newSlash := NewSlashCommand(test.args, testYamlPath)
+			newSlash, _ := NewSlashCommand(test.args, testYamlPath)
 			got, err := newSlash.GetCommandString(test.args)
 			if err != nil {
 				assert.Equal(t, test.expectError, true)
