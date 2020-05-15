@@ -1,6 +1,7 @@
 package slashparse
 
 import (
+	"errors"
 	"strings"
 
 	"io/ioutil"
@@ -35,7 +36,6 @@ type Slash interface {
 //NewSlashCommand define a new slash command to parse
 func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err error) {
 
-	//m := make(map[interface{}]interface{})
 	slashDef, yamlErr := ioutil.ReadFile(pathToYaml)
 	if yamlErr != nil {
 		return s, yamlErr
@@ -44,6 +44,11 @@ func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err erro
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
 	if unmarshalErr != nil {
 		return s, unmarshalErr
+	}
+
+	_, commandErr := s.GetCommandString(args)
+	if commandErr != nil {
+		return SlashCommand{}, commandErr
 	}
 
 	return s, nil
@@ -76,5 +81,5 @@ func (s *SlashCommand) GetCommandString(args []string) (commandString string, er
 		return s.Name, nil
 	}
 
-	return "", err
+	return "", errors.New(command + " is not a valid command")
 }

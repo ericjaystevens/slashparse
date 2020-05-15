@@ -1,16 +1,18 @@
 package slashparse
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 type newSlashCommandTests struct {
-	testName   string
-	args       []string
-	want       SlashCommand
-	configPath string
+	testName      string
+	args          []string
+	want          SlashCommand
+	configPath    string
+	expectedError error
 }
 
 func TestNewSlashCommand(t *testing.T) {
@@ -30,14 +32,22 @@ func TestNewSlashCommand(t *testing.T) {
 				},
 			},
 		},
+		{
+			testName:      "invalid test",
+			args:          []string{"/pssrint"},
+			configPath:    "./examples/helloWorld/simple.yaml",
+			expectedError: errors.New("pssrint is not a valid command"),
+		},
 	}
 
 	for _, test := range tests {
-		newSlash, err := NewSlashCommand(test.args, test.configPath)
-		if err != nil {
-			return
-		}
-		assert.Equal(t, test.want, newSlash)
+		t.Run(test.testName, func(t *testing.T) {
+			newSlash, err := NewSlashCommand(test.args, test.configPath)
+			if err != nil {
+				assert.Equal(t, test.expectedError, err)
+			}
+			assert.Equal(t, test.want, newSlash)
+		})
 	}
 }
 
