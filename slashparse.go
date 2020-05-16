@@ -27,6 +27,7 @@ type SlashCommand struct {
 	Name        string     `yaml:"name"`
 	Description string     `yaml:"description"`
 	Arguments   []Argument `yaml:"arguments"`
+	Values map[string]string
 }
 
 type Slash interface {
@@ -51,6 +52,8 @@ func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err erro
 		return SlashCommand{}, commandErr
 	}
 
+	s.Values = s.GetValues(args)
+
 	return s, nil
 }
 
@@ -68,6 +71,13 @@ func (s *SlashCommand) GetSlashHelp() string {
 	}
 
 	return header + "\n" + description + "\n\n" + arguments + "\n"
+}
+
+func (s *SlashCommand) GetValues (args []string) (map[string]string) {
+
+m := make(map[string]string)
+	m["text"] = "foo bar"
+	return m
 }
 
 func (s *SlashCommand) GetCommandString(args []string) (commandString string, err error) {

@@ -33,11 +33,36 @@ func TestNewSlashCommand(t *testing.T) {
 			},
 		},
 		{
-			testName:      "invalid test",
+			testName:      "invalid command test",
 			args:          []string{"/pssrint"},
 			configPath:    "./examples/helloWorld/simple.yaml",
 			expectedError: errors.New("pssrint is not a valid command"),
 		},
+		{
+			testName:   "quoted text paramater value test",
+			args:       []string{"/print", `"foo`, `bar"`},
+			configPath: "./examples/helloWorld/simple.yaml",
+			want: SlashCommand{
+				Name:        "Print",
+				Description: "Echos back what you type.",
+				Arguments: []Argument{
+					{
+						Name:        "text",
+						Description: "text you want to print",
+					},
+				},
+				Values : map[string]string{
+    				"text": "foo bar",
+			    },
+			},
+		},
+		//{
+			//testName:      "invalid argument test",
+			//args:          []string{"/print foo"},
+			//configPath:    "./examples/helloWorld/simple.yaml",
+			//expectedError: errors.New("foo is not a valid value for text. Expected format is quoted text."),
+	//	},
+		
 	}
 
 	for _, test := range tests {
