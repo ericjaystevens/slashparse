@@ -20,6 +20,7 @@ type Slashdef struct {
 
 type Argument struct {
 	Name        string `yaml:"name"`
+	ArgType     string `yaml:argtype`
 	Description string `yaml:"description"`
 }
 
@@ -27,7 +28,7 @@ type SlashCommand struct {
 	Name        string     `yaml:"name"`
 	Description string     `yaml:"description"`
 	Arguments   []Argument `yaml:"arguments"`
-	Values map[string]string
+	Values      map[string]string
 }
 
 type Slash interface {
@@ -36,7 +37,6 @@ type Slash interface {
 
 //NewSlashCommand define a new slash command to parse
 func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err error) {
-
 	slashDef, yamlErr := ioutil.ReadFile(pathToYaml)
 	if yamlErr != nil {
 		return s, yamlErr
@@ -58,7 +58,6 @@ func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err erro
 }
 
 func (s *SlashCommand) GetSlashHelp() string {
-
 	header := "## " + s.Name + " Help"
 
 	description := "* " + s.Description + " *"
@@ -73,10 +72,35 @@ func (s *SlashCommand) GetSlashHelp() string {
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-func (s *SlashCommand) GetValues (args []string) (map[string]string) {
+func (s *SlashCommand) GetValues(args []string) map[string]string {
+	m := make(map[string]string)
 
-m := make(map[string]string)
-	m["text"] = "foo bar"
+	var position int
+	for _, slashArg := range s.Arguments {
+		if slashArg.ArgType == "quoted text" {
+			position = 1 //position indicates  where the value of the argument starts
+			// maybee we should turn the args array into a string and no deal with the comlexity of presplit args?
+			if len(args) > position {
+
+				//is the first character a quote
+				if args[position][0] == '"' {
+					// remove quote and start building string
+					m["text"] = args[position][1:len(args[position])]
+
+					if args[position][len(args[position])-1:] != `"` {
+						position++
+						//append strings until end quote is found
+						for endQuoteFound := true; endQuoteFound; endQuoteFound = !(args[position][len(args[position])-1:] == `"`) {
+							m["text"] += " "
+							m["text"] += args[position]
+						}
+					}
+					//remove the ending quote
+					m["text"] = m["text"][0 : len(m["text"])-1]
+				}
+			}
+		}
+	}
 	return m
 }
 
