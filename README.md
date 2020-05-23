@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/ericjaystevens/slashparse)](https://goreportcard.com/report/github.com/ericjaystevens/slashparse)
+
 # slashparse
 Go module for parsing slash commands
 
