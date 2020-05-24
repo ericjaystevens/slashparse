@@ -22,6 +22,7 @@ type Argument struct {
 	Name        string `yaml:"name"`
 	ArgType     string `yaml:argtype`
 	Description string `yaml:"description"`
+	ErrorMsg    string `yaml:"errorMsg"`
 }
 
 type SlashCommand struct {
@@ -52,7 +53,11 @@ func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err erro
 		return SlashCommand{}, commandErr
 	}
 
-	s.Values = s.GetValues(args)
+	var argErr error
+	s.Values, argErr = s.GetValues(args)
+	if argErr != nil {
+		return SlashCommand{}, argErr
+	}
 
 	return s, nil
 }
@@ -72,7 +77,7 @@ func (s *SlashCommand) GetSlashHelp() string {
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-func (s *SlashCommand) GetValues(args []string) map[string]string {
+func (s *SlashCommand) GetValues(args []string) (map[string]string, error) {
 	m := make(map[string]string)
 
 	var position int
@@ -97,11 +102,13 @@ func (s *SlashCommand) GetValues(args []string) map[string]string {
 					}
 					//remove the ending quote
 					m["text"] = m["text"][0 : len(m["text"])-1]
+				} else {
+					return m, errors.New(slashArg.ErrorMsg)
 				}
 			}
 		}
 	}
-	return m
+	return m, nil
 }
 
 func (s *SlashCommand) GetCommandString(args []string) (commandString string, err error) {

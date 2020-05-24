@@ -29,6 +29,7 @@ func TestNewSlashCommand(t *testing.T) {
 						Name:        "text",
 						ArgType:     "quoted text",
 						Description: "text you want to print",
+						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 					},
 				},
 				Values: map[string]string{},
@@ -52,6 +53,7 @@ func TestNewSlashCommand(t *testing.T) {
 						Name:        "text",
 						ArgType:     "quoted text",
 						Description: "text you want to print",
+						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 					},
 				},
 				Values: map[string]string{
@@ -59,13 +61,12 @@ func TestNewSlashCommand(t *testing.T) {
 				},
 			},
 		},
-		//{
-		//testName:      "invalid argument test",
-		//args:          []string{"/print foo"},
-		//configPath:    "./examples/helloWorld/simple.yaml",
-		//expectedError: errors.New("foo is not a valid value for text. Expected format is quoted text."),
-		//	},
-
+		{
+			testName:      "invalid argument test",
+			args:          []string{"/print", "foo"},
+			configPath:    "./examples/helloWorld/simple.yaml",
+			expectedError: errors.New("foo is not a valid value for text. Expected format is quoted text."),
+		},
 	}
 
 	for _, test := range tests {
