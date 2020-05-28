@@ -4,8 +4,6 @@ import (
 	"errors"
 	"strings"
 
-	"io/ioutil"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -37,11 +35,7 @@ type Slash interface {
 }
 
 //NewSlashCommand define a new slash command to parse
-func NewSlashCommand(args []string, pathToYaml string) (s SlashCommand, err error) {
-	slashDef, yamlErr := ioutil.ReadFile(pathToYaml)
-	if yamlErr != nil {
-		return s, yamlErr
-	}
+func NewSlashCommand(args []string, slashDef []byte) (s SlashCommand, err error) {
 
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
 	if unmarshalErr != nil {

@@ -2,6 +2,7 @@ package slashparse
 
 import (
 	"errors"
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,7 +72,10 @@ func TestNewSlashCommand(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			newSlash, err := NewSlashCommand(test.args, test.configPath)
+
+			slashDef, _ := ioutil.ReadFile(test.configPath)
+
+			newSlash, err := NewSlashCommand(test.args, slashDef)
 			if err != nil {
 				assert.Equal(t, test.expectedError, err)
 			}
@@ -84,7 +88,9 @@ func TestGetSlashHelp(t *testing.T) {
 	testYamlPath := "./examples/helloWorld/simple.yaml"
 
 	args := []string{"/print"}
-	newSlash, _ := NewSlashCommand(args, testYamlPath)
+
+	slashDef, _ := ioutil.ReadFile(testYamlPath)
+	newSlash, _ := NewSlashCommand(args, slashDef)
 
 	got := newSlash.GetSlashHelp()
 
@@ -123,7 +129,9 @@ func TestGetCommandString(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
 			testYamlPath := "./examples/helloWorld/simple.yaml"
-			newSlash, _ := NewSlashCommand(test.args, testYamlPath)
+
+			slashDef, _ := ioutil.ReadFile(testYamlPath)
+			newSlash, _ := NewSlashCommand(test.args, slashDef)
 			got, err := newSlash.GetCommandString(test.args)
 			if err != nil {
 				assert.Equal(t, test.expectError, true)
@@ -133,8 +141,3 @@ func TestGetCommandString(t *testing.T) {
 		})
 	}
 }
-
-//todo:
-// make go mod
-// fix go Grade
-// get value returns empty dictionar~!	1
