@@ -10,7 +10,7 @@ import (
 
 type newSlashCommandTests struct {
 	testName      string
-	args          []string
+	args          string
 	want          SlashCommand
 	configPath    string
 	expectedError error
@@ -20,7 +20,7 @@ func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
 		{
 			testName:   "simple test",
-			args:       []string{"/print"},
+			args:       "/print",
 			configPath: "./examples/helloWorld/simple.yaml",
 			want: SlashCommand{
 				Name:        "Print",
@@ -38,13 +38,13 @@ func TestNewSlashCommand(t *testing.T) {
 		},
 		{
 			testName:      "invalid command test",
-			args:          []string{"/pssrint"},
+			args:          "/pssrint",
 			configPath:    "./examples/helloWorld/simple.yaml",
 			expectedError: errors.New("pssrint is not a valid command"),
 		},
 		{
 			testName:   "quoted text paramater value test",
-			args:       []string{"/print", `"foo`, `bar"`},
+			args:       `/print "foo bar"`,
 			configPath: "./examples/helloWorld/simple.yaml",
 			want: SlashCommand{
 				Name:        "Print",
@@ -64,7 +64,7 @@ func TestNewSlashCommand(t *testing.T) {
 		},
 		{
 			testName:      "invalid argument test",
-			args:          []string{"/print", "foo"},
+			args:          "/print foo",
 			configPath:    "./examples/helloWorld/simple.yaml",
 			expectedError: errors.New("foo is not a valid value for text. Expected format is quoted text."),
 		},
@@ -87,7 +87,7 @@ func TestNewSlashCommand(t *testing.T) {
 func TestGetSlashHelp(t *testing.T) {
 	testYamlPath := "./examples/helloWorld/simple.yaml"
 
-	args := []string{"/print"}
+	args := "/print"
 
 	slashDef, _ := ioutil.ReadFile(testYamlPath)
 	newSlash, _ := NewSlashCommand(args, slashDef)
@@ -106,7 +106,7 @@ func TestGetSlashHelp(t *testing.T) {
 
 type getCommandStringTests struct {
 	testName    string
-	args        []string
+	args        string
 	want        string
 	expectError bool
 }
@@ -115,12 +115,12 @@ func TestGetCommandString(t *testing.T) {
 	tests := []getCommandStringTests{
 		{
 			testName: "valid print example",
-			args:     []string{"/print"},
+			args:     "/print",
 			want:     "Print",
 		},
 		{
 			testName:    "invalid print example",
-			args:        []string{""},
+			args:        "",
 			want:        "",
 			expectError: true,
 		},
