@@ -2,6 +2,7 @@ package slashparse
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -74,11 +75,31 @@ func (s *SlashCommand) GetSlashHelp() string {
 func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
 	m := make(map[string]string)
 
+	//remove command from string
+	command, err := s.GetCommandString(args)
+	if err != nil {
+		return m, err
+	}
+
+	//use regex for case insesitvity
+	re := regexp.MustCompile(`(?i)/` + command)
+	loc := re.FindStringIndex(args)
+	if len(loc) == 0 {
+		return m, err //command not included in string?
+	}
+
+	parameters := strings.TrimSpace(args[loc[1]:])
+
+	if len(parameters) == 0 {
+		return m, nil
+	}
+
+	// need to go ordered here?
 	for _, slashArg := range s.Arguments {
 		if slashArg.ArgType == "quoted text" {
 			// remove quote and start building string
 			//m["text"] = args[position][1:len(args[position])]
-			m["text"] = "foo"
+			m["text"] = parameters
 		}
 	}
 	return m, nil
