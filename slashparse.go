@@ -94,12 +94,41 @@ func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
 		return m, nil
 	}
 
+	var isQuoteText bool
+	var previousCharacter rune
+	var currentParameter string
+	params := make(map[int]string)
+	curPosition := 0
+
+	for _, character := range parameters {
+
+		if character == '"' {
+			if isQuoteText {
+				params[curPosition] += string(character)
+				curPosition++
+			} else {
+				if previousCharacter != '\\' {
+					isQuoteText = true
+					params[curPosition] += string(character)
+				} else {
+					//remove the escape character from the the value and add the quote
+					params[curPosition][len(params[curPosition])-1:] = string(character)
+				}
+
+			}
+			previousCharacter = character
+			break
+		}
+
+		previosCharacter = character
+	}
+
 	// need to go ordered here?
 	for _, slashArg := range s.Arguments {
 		if slashArg.ArgType == "quoted text" {
 			// remove quote and start building string
 			//m["text"] = args[position][1:len(args[position])]
-			m["text"] = parameters
+			m["text"] = parameters[1 : len(parameters)-1]
 		}
 	}
 	return m, nil
