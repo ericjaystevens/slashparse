@@ -141,3 +141,9 @@ func TestGetCommandString(t *testing.T) {
 		})
 	}
 }
+
+func TestGetPositionalParams(t *testing.T) {
+	got := GetPositionalParams("foo \"man chu\" choo wow")
+	want := []string{"foo", "man chu", "choo", "wow"}
+	assert.Equal(t, want, got)
+}
