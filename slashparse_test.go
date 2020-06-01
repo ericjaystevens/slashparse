@@ -31,6 +31,7 @@ func TestNewSlashCommand(t *testing.T) {
 						ArgType:     "quoted text",
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
+						Position:    1,
 					},
 				},
 				Values: map[string]string{},
@@ -55,18 +56,13 @@ func TestNewSlashCommand(t *testing.T) {
 						ArgType:     "quoted text",
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
+						Position:    1,
 					},
 				},
 				Values: map[string]string{
 					"text": "foo bar",
 				},
 			},
-		},
-		{
-			testName:      "invalid argument test",
-			args:          "/print foo",
-			configPath:    "./examples/helloWorld/simple.yaml",
-			expectedError: errors.New("foo is not a valid value for text. Expected format is quoted text."),
 		},
 	}
 
@@ -142,8 +138,8 @@ func TestGetCommandString(t *testing.T) {
 	}
 }
 
-func TestGetPositionalParams(t *testing.T) {
-	got := GetPositionalParams("foo \"man chu\" choo wow")
-	want := []string{"foo", "man chu", "choo", "wow"}
+func TestGetPositionalArgs(t *testing.T) {
+	got := GetPositionalArgs("foo \"man chu\"  \\choo wow")
+	want := []string{"foo", "man chu", "\\choo", "wow"}
 	assert.Equal(t, want, got)
 }

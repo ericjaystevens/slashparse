@@ -8,6 +8,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const (
+	space       = ' '
+	backspace   = '\\'
+	doubleQuote = '"'
+)
+
 type Slashdef struct {
 	name        string
 	description string
@@ -22,6 +28,7 @@ type Argument struct {
 	ArgType     string `yaml:argtype`
 	Description string `yaml:"description"`
 	ErrorMsg    string `yaml:"errorMsg"`
+	Position    int    `yaml:position`
 }
 
 type SlashCommand struct {
@@ -81,7 +88,7 @@ func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
 		return m, err
 	}
 
-	//use regex for case insesitvity
+	//use regex for case insensitivity
 	re := regexp.MustCompile(`(?i)/` + command)
 	loc := re.FindStringIndex(args)
 	if len(loc) == 0 {
@@ -95,13 +102,12 @@ func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
 	}
 
 	// need to go ordered here?
-	positionalParams := GetPositionalParams(parameters)
+	positionalArgs := GetPositionalArgs(parameters)
 
 	for _, slashArg := range s.Arguments {
-		if slashArg.ArgType == "quoted text" {
-			// remove quote and start building string
-			//m["text"] = args[position][1:len(args[position])]
-			m["text"] = positionalParams[1]
+		position := slashArg.Position
+		if len(positionalArgs) >= position {
+			m[slashArg.Name] = positionalArgs[position-1]
 		}
 	}
 	return m, nil
@@ -123,55 +129,52 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 	return "", errors.New(command + " is not a valid command")
 }
 
-func GetPositionalParams(paramString string) (splitParams []string) {
+//GetPositionalArgs takes a string of arguments and splits it up by spaces and double quotes
+func GetPositionalArgs(argString string) []string {
 	var isQuoteText bool
 	var previousCharacter rune
-	params := make([]string, 0, 20)
-	curPosition := 0
-	var currentParam string
+	args := make([]string, 0, 20)
+	currentPosition := 0
+	var currentArg string
 
-	for _, character := range paramString {
-
+	for _, character := range argString {
 		switch character {
-		case ' ':
-			if len(currentParam) > 0 {
+		case space:
+			if len(currentArg) > 0 {
 				if isQuoteText {
-					currentParam += string(character)
+					currentArg += string(character)
 				} else {
-					params = append(params, currentParam)
-					curPosition++
-					currentParam = ""
+					// ignore duplicate spaces between
+					if previousCharacter != space {
+						args = append(args, currentArg)
+						currentPosition++
+						currentArg = ""
+					}
 				}
 			}
-		case '"':
+		case doubleQuote:
 			if isQuoteText {
 				//this is and end quote
-				//params[curPosition] += string(character)
 				isQuoteText = false
-				params = append(params, currentParam)
-				curPosition++
-				currentParam = ""
+				args = append(args, currentArg)
+				currentPosition++
+				currentArg = ""
 			} else {
-				if previousCharacter != '\\' {
+				if previousCharacter != backspace {
 					isQuoteText = true
-					//params[curPosition] += string(character)
 				} else {
 					//remove the escape character from the the value and add the quote
-					//params[curPosition][len(params[curPosition])-1:] = string(character)
+					currentArg = currentArg[:len(currentArg)-1] + string(doubleQuote)
 				}
-
 			}
-			previousCharacter = character
-			break
 		default:
-			currentParam += string(character)
+			currentArg += string(character)
 		}
 		previousCharacter = character
+	}
 
+	if len(currentArg) > 0 {
+		args = append(args, currentArg)
 	}
-	if len(currentParam) > 0 {
-		params = append(params, currentParam)
-	}
-	splitParams = params
-	return
+	return args
 }
