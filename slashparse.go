@@ -126,19 +126,35 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 func GetPositionalParams(paramString string) (splitParams []string) {
 	var isQuoteText bool
 	var previousCharacter rune
-	params := make([]string, 10)
+	params := make([]string, 0, 20)
 	curPosition := 0
+	var currentParam string
 
 	for _, character := range paramString {
 
-		if character == '"' {
+		switch character {
+		case ' ':
+			if len(currentParam) > 0 {
+				if isQuoteText {
+					currentParam += string(character)
+				} else {
+					params = append(params, currentParam)
+					curPosition++
+					currentParam = ""
+				}
+			}
+		case '"':
 			if isQuoteText {
-				params[curPosition] += string(character)
+				//this is and end quote
+				//params[curPosition] += string(character)
+				isQuoteText = false
+				params = append(params, currentParam)
 				curPosition++
+				currentParam = ""
 			} else {
 				if previousCharacter != '\\' {
 					isQuoteText = true
-					params[curPosition] += string(character)
+					//params[curPosition] += string(character)
 				} else {
 					//remove the escape character from the the value and add the quote
 					//params[curPosition][len(params[curPosition])-1:] = string(character)
@@ -147,10 +163,14 @@ func GetPositionalParams(paramString string) (splitParams []string) {
 			}
 			previousCharacter = character
 			break
+		default:
+			currentParam += string(character)
 		}
-
 		previousCharacter = character
 
+	}
+	if len(currentParam) > 0 {
+		params = append(params, currentParam)
 	}
 	splitParams = params
 	return
