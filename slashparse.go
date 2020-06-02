@@ -14,23 +14,16 @@ const (
 	doubleQuote = '"'
 )
 
-type Slashdef struct {
-	name        string
-	description string
-	arguments   struct {
-		name        string
-		description string
-	}
-}
-
+//Argument defines and argument in a slash command
 type Argument struct {
 	Name        string `yaml:"name"`
-	ArgType     string `yaml:argtype`
+	ArgType     string `yaml:"argtype"`
 	Description string `yaml:"description"`
 	ErrorMsg    string `yaml:"errorMsg"`
-	Position    int    `yaml:position`
+	Position    int    `yaml:"position"`
 }
 
+//SlashCommand defines the structure of a slash command string
 type SlashCommand struct {
 	Name        string     `yaml:"name"`
 	Description string     `yaml:"description"`
@@ -38,13 +31,8 @@ type SlashCommand struct {
 	Values      map[string]string
 }
 
-type Slash interface {
-	GetSlashHelp() string
-}
-
 //NewSlashCommand define a new slash command to parse
 func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
-
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
 	if unmarshalErr != nil {
 		return s, unmarshalErr
@@ -64,6 +52,7 @@ func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
 	return s, nil
 }
 
+//GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
 	header := "## " + s.Name + " Help"
 
@@ -75,34 +64,34 @@ func (s *SlashCommand) GetSlashHelp() string {
 	for _, argument := range s.Arguments {
 		arguments += "\n\n* " + argument.Name + ": " + argument.Description
 	}
-
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
+//GetValues takes a command and arguments and gets a dictionary of values by argument name
+func (s *SlashCommand) GetValues(CommandAndArgs string) (map[string]string, error) {
 	m := make(map[string]string)
 
 	//remove command from string
-	command, err := s.GetCommandString(args)
+	command, err := s.GetCommandString(CommandAndArgs)
 	if err != nil {
 		return m, err
 	}
 
 	//use regex for case insensitivity
 	re := regexp.MustCompile(`(?i)/` + command)
-	loc := re.FindStringIndex(args)
+	loc := re.FindStringIndex(CommandAndArgs)
 	if len(loc) == 0 {
 		return m, err //command not included in string?
 	}
 
-	parameters := strings.TrimSpace(args[loc[1]:])
+	args := strings.TrimSpace(CommandAndArgs[loc[1]:])
 
-	if len(parameters) == 0 {
+	if len(args) == 0 {
 		return m, nil
 	}
 
 	// need to go ordered here?
-	positionalArgs := GetPositionalArgs(parameters)
+	positionalArgs := GetPositionalArgs(args)
 
 	for _, slashArg := range s.Arguments {
 		position := slashArg.Position
@@ -113,6 +102,7 @@ func (s *SlashCommand) GetValues(args string) (map[string]string, error) {
 	return m, nil
 }
 
+//GetCommandString gets and validated the command portion of a command and argument string
 func (s *SlashCommand) GetCommandString(args string) (commandString string, err error) {
 	argsSplit := strings.Fields(args)
 
