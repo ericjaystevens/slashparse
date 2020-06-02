@@ -16,6 +16,13 @@ type newSlashCommandTests struct {
 	expectedError error
 }
 
+func getSimpleDef() []byte {
+	simpleDef, _ := ioutil.ReadFile("./examples/helloWorld/simple.yaml")
+	return simpleDef
+}
+
+var SimpleDef = getSimpleDef()
+
 func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
 		{
@@ -141,5 +148,15 @@ func TestGetCommandString(t *testing.T) {
 func TestGetPositionalArgs(t *testing.T) {
 	got := GetPositionalArgs("foo \"man chu\"  \\choo wow")
 	want := []string{"foo", "man chu", "\\choo", "wow"}
+	assert.Equal(t, want, got)
+}
+
+func TestGetValues(t *testing.T) {
+
+	commandAndArgs := "/print foo"
+	newSlash, _ := NewSlashCommand(commandAndArgs, SimpleDef)
+	got, _ := newSlash.GetValues(commandAndArgs)
+
+	want := map[string]string{"text": "foo"}
 	assert.Equal(t, want, got)
 }
