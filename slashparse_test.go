@@ -42,6 +42,21 @@ func TestNewSlashCommand(t *testing.T) {
 					},
 				},
 				Values: map[string]string{},
+				SubCommands: []SubCommand{
+					SubCommand{
+						Name:        "reverse",
+						Description: "reverses back what you type.",
+						Arguments: []Argument{
+							Argument{
+								Name:        "text",
+								ArgType:     "quoted text",
+								Description: "text you want to print",
+								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
+								Position:    0,
+							},
+						},
+					},
+				},
 			},
 		},
 		{
@@ -68,6 +83,21 @@ func TestNewSlashCommand(t *testing.T) {
 				},
 				Values: map[string]string{
 					"text": "foo bar",
+				},
+				SubCommands: []SubCommand{
+					SubCommand{
+						Name:        "reverse",
+						Description: "reverses back what you type.",
+						Arguments: []Argument{
+							Argument{
+								Name:        "text",
+								ArgType:     "quoted text",
+								Description: "text you want to print",
+								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
+								Position:    0,
+							},
+						},
+					},
 				},
 			},
 		},
@@ -126,6 +156,11 @@ func TestGetCommandString(t *testing.T) {
 			args:        "",
 			want:        "",
 			expectError: true,
+		},
+		{
+			testName: "sub command example",
+			args:     "/print reverse hsals",
+			want:     "Print reverse",
 		},
 	}
 

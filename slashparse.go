@@ -29,9 +29,18 @@ type SlashCommand struct {
 	Description string     `yaml:"description"`
 	Arguments   []Argument `yaml:"arguments"`
 	Values      map[string]string
+	SubCommands []SubCommand
+}
+
+//SubCommand defines a command that proceded the slash command
+type SubCommand struct {
+	Name        string     `yaml:"name"`
+	Description string     `yaml:"description"`
+	Arguments   []Argument `yaml:"arguments"`
 }
 
 //NewSlashCommand define a new slash command to parse
+// TODO: I don't think this should actually take the args or return the value
 func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
 	if unmarshalErr != nil {
@@ -111,6 +120,17 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 	}
 
 	command := strings.Replace(argsSplit[0], "/", "", 1)
+	args = strings.Replace(args, "/", "", 1)
+
+	//i hate this, regex might be better
+	for _, subCommand := range s.SubCommands {
+		subCommandString := s.Name + " " + subCommand.Name
+		if len(args) >= len(subCommandString) {
+			if strings.EqualFold(args[:len(subCommandString)], subCommandString) {
+				return subCommandString, nil
+			}
+		}
+	}
 
 	if strings.EqualFold(command, s.Name) {
 		return s.Name, nil
