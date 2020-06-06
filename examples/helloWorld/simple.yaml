@@ -15,3 +15,15 @@ subcommands:
         argtype: quoted text
         description: text you want to print
         errorMsg: foo is not a valid value for text. Expected format is quoted text.
+  - name: quote
+    description: helps you stand on the shoulders of giants by using words from histories most articulate people
+    subcommands:
+      - name: random
+        description: print a random quote from the a random author
+      - name: author
+        description: prints a quote from the specified author
+        arguments:
+          - name: authorName
+            argtype: text
+            description: Full Name of an author
+            errorMsg: Please provide a valid author name, try someone famous 

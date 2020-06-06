@@ -34,9 +34,10 @@ type SlashCommand struct {
 
 //SubCommand defines a command that proceded the slash command
 type SubCommand struct {
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description"`
-	Arguments   []Argument `yaml:"arguments"`
+	Name        string       `yaml:"name"`
+	Description string       `yaml:"description"`
+	Arguments   []Argument   `yaml:"arguments"`
+	SubCommands []SubCommand `yaml:"subcommand"`
 }
 
 //NewSlashCommand define a new slash command to parse
