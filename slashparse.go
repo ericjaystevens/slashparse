@@ -29,7 +29,7 @@ type SlashCommand struct {
 	Description string     `yaml:"description"`
 	Arguments   []Argument `yaml:"arguments"`
 	Values      map[string]string
-	SubCommands []SubCommand
+	SubCommands []SubCommand `yaml:"subcommands"`
 }
 
 //SubCommand defines a command that proceded the slash command
@@ -37,7 +37,7 @@ type SubCommand struct {
 	Name        string       `yaml:"name"`
 	Description string       `yaml:"description"`
 	Arguments   []Argument   `yaml:"arguments"`
-	SubCommands []SubCommand `yaml:"subcommand"`
+	SubCommands []SubCommand `yaml:"subcommands"`
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -125,6 +125,17 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 
 	//i hate this, regex might be better
 	for _, subCommand := range s.SubCommands {
+
+		for _, subSubCommand := range subCommand.SubCommands {
+			subCommandString := s.Name + " " + subCommand.Name + " " + subSubCommand.Name
+			if len(args) >= len(subCommandString) {
+				if strings.EqualFold(args[:len(subCommandString)], subCommandString) {
+					return subCommandString, nil
+				}
+			}
+
+		}
+
 		subCommandString := s.Name + " " + subCommand.Name
 		if len(args) >= len(subCommandString) {
 			if strings.EqualFold(args[:len(subCommandString)], subCommandString) {

@@ -56,6 +56,33 @@ func TestNewSlashCommand(t *testing.T) {
 							},
 						},
 					},
+					SubCommand{
+						Name:        "quote",
+						Description: "helps you stand on the shoulders of giants by using words from histories most articulate people",
+						Arguments:   []Argument(nil),
+						SubCommands: []SubCommand{
+							SubCommand{
+								Name:        "random",
+								Description: "print a random quote from the a random author",
+								Arguments:   []Argument(nil),
+								SubCommands: []SubCommand(nil),
+							},
+							SubCommand{
+								Name:        "author",
+								Description: "prints a quote from the specified author",
+								Arguments: []Argument{
+									Argument{
+										Name:        "authorName",
+										ArgType:     "text",
+										Description: "Full Name of an author",
+										ErrorMsg:    "Please provide a valid author name, try someone famous",
+										Position:    0,
+									},
+								},
+								SubCommands: []SubCommand(nil),
+							},
+						},
+					},
 				},
 			},
 		},
@@ -97,25 +124,30 @@ func TestNewSlashCommand(t *testing.T) {
 								Position:    0,
 							},
 						},
+					},
+					SubCommand{
+						Name:        "quote",
+						Description: "helps you stand on the shoulders of giants by using words from histories most articulate people",
+						Arguments:   []Argument(nil),
 						SubCommands: []SubCommand{
 							SubCommand{
-								Name:        "reverse",
-								Description: "reverses back what you type.",
-								Arguments: []Argument{
-									Argument{
-										Name:        "text",
-										ArgType:     "quoted text",
-										Description: "text you want to print",
-										ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
-										Position:    0,
-									},
-								},
+								Name:        "random",
+								Description: "print a random quote from the a random author",
+								Arguments:   []Argument(nil),
 								SubCommands: []SubCommand(nil),
 							},
 							SubCommand{
-								Name:        "quote",
-								Description: "helps you stand on the shoulders of giants by using words from histories most articulate people",
-								Arguments:   []Argument(nil),
+								Name:        "author",
+								Description: "prints a quote from the specified author",
+								Arguments: []Argument{
+									Argument{
+										Name:        "authorName",
+										ArgType:     "text",
+										Description: "Full Name of an author",
+										ErrorMsg:    "Please provide a valid author name, try someone famous",
+										Position:    0,
+									},
+								},
 								SubCommands: []SubCommand(nil),
 							},
 						},
