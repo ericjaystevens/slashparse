@@ -234,7 +234,7 @@ func TestGetCommandString(t *testing.T) {
 
 			slashDef, _ := ioutil.ReadFile(testYamlPath)
 			newSlash, _ := NewSlashCommand(test.args, slashDef)
-			got, err := newSlash.GetCommandString(test.args)
+			got, err := newSlash.getCommandString(test.args)
 			if err != nil {
 				assert.Equal(t, test.expectError, true)
 			} else {
@@ -254,7 +254,7 @@ func TestGetValues(t *testing.T) {
 
 	commandAndArgs := "/print foo"
 	newSlash, _ := NewSlashCommand(commandAndArgs, SimpleDef)
-	got, _ := newSlash.GetValues(commandAndArgs)
+	got, _ := newSlash.getValues(commandAndArgs)
 
 	want := map[string]string{"text": "foo"}
 	assert.Equal(t, want, got)

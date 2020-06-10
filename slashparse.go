@@ -48,13 +48,13 @@ func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
 		return s, unmarshalErr
 	}
 
-	_, commandErr := s.GetCommandString(args)
+	_, commandErr := s.getCommandString(args)
 	if commandErr != nil {
 		return SlashCommand{}, commandErr
 	}
 
 	var argErr error
-	s.Values, argErr = s.GetValues(args)
+	s.Values, argErr = s.getValues(args)
 	if argErr != nil {
 		return SlashCommand{}, argErr
 	}
@@ -77,12 +77,12 @@ func (s *SlashCommand) GetSlashHelp() string {
 	return header + "\n" + description + "\n\n" + arguments + "\n"
 }
 
-//GetValues takes a command and arguments and gets a dictionary of values by argument name
-func (s *SlashCommand) GetValues(CommandAndArgs string) (map[string]string, error) {
+//getValues takes a command and arguments and gets a dictionary of values by argument name
+func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, error) {
 	m := make(map[string]string)
 
 	//remove command from string
-	command, err := s.GetCommandString(CommandAndArgs)
+	command, err := s.getCommandString(CommandAndArgs)
 	if err != nil {
 		return m, err
 	}
@@ -112,8 +112,8 @@ func (s *SlashCommand) GetValues(CommandAndArgs string) (map[string]string, erro
 	return m, nil
 }
 
-//GetCommandString gets and validated the command portion of a command and argument string
-func (s *SlashCommand) GetCommandString(args string) (commandString string, err error) {
+//getCommandString gets and validated the command portion of a command and argument string
+func (s *SlashCommand) getCommandString(args string) (commandString string, err error) {
 	argsSplit := strings.Fields(args)
 
 	if len(argsSplit) < 1 {
@@ -153,12 +153,12 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 
 //Parse parse the command string
 func (s *SlashCommand) Parse(slashString string) (string, map[string]string, error) {
-	commandString, err := s.GetCommandString(slashString)
+	commandString, err := s.getCommandString(slashString)
 	if err != nil {
 		return "", nil, err
 	}
 
-	values, err := s.GetValues(slashString)
+	values, err := s.getValues(slashString)
 	if err != nil {
 		return "", nil, err
 	}
