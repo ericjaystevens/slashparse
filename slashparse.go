@@ -151,6 +151,21 @@ func (s *SlashCommand) GetCommandString(args string) (commandString string, err 
 	return "", errors.New(command + " is not a valid command")
 }
 
+//Parse parse the command string
+func (s *SlashCommand) Parse(slashString string) (string, map[string]string, error) {
+	commandString, err := s.GetCommandString(slashString)
+	if err != nil {
+		return "", nil, err
+	}
+
+	values, err := s.GetValues(slashString)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return commandString, values, nil
+}
+
 //GetPositionalArgs takes a string of arguments and splits it up by spaces and double quotes
 func GetPositionalArgs(argString string) []string {
 	var isQuoteText bool

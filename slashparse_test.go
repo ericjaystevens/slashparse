@@ -259,3 +259,16 @@ func TestGetValues(t *testing.T) {
 	want := map[string]string{"text": "foo"}
 	assert.Equal(t, want, got)
 }
+
+func TestParse(t *testing.T) {
+	slashCommandString := "/print foo"
+
+	wantCommands := "Print"
+	wantValues := map[string]string{"text": "foo"}
+
+	newSlash, _ := NewSlashCommand(slashCommandString, SimpleDef)
+	gotCommands, gotValues, _ := newSlash.Parse(slashCommandString)
+
+	assert.Equal(t, gotCommands, wantCommands)
+	assert.Equal(t, gotValues, wantValues)
+}
