@@ -40,16 +40,10 @@ type SubCommand struct {
 }
 
 //NewSlashCommand define a new slash command to parse
-// TODO: I don't think this should actually take the args or return the value
-func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
+func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
 	if unmarshalErr != nil {
 		return s, unmarshalErr
-	}
-
-	_, commandErr := s.getCommandString(args)
-	if commandErr != nil {
-		return SlashCommand{}, commandErr
 	}
 
 	var argErr error

@@ -1,7 +1,6 @@
 package slashparse
 
 import (
-	"errors"
 	"io/ioutil"
 	"testing"
 
@@ -10,7 +9,6 @@ import (
 
 type newSlashCommandTests struct {
 	testName      string
-	args          string
 	want          SlashCommand
 	configPath    string
 	expectedError error
@@ -27,7 +25,6 @@ func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
 		{
 			testName:   "simple test",
-			args:       "/print",
 			configPath: "./examples/helloWorld/simple.yaml",
 			want: SlashCommand{
 				Name:        "Print",
@@ -86,14 +83,7 @@ func TestNewSlashCommand(t *testing.T) {
 			},
 		},
 		{
-			testName:      "invalid command test",
-			args:          "/pssrint",
-			configPath:    "./examples/helloWorld/simple.yaml",
-			expectedError: errors.New("pssrint is not a valid command"),
-		},
-		{
 			testName:   "quoted text paramater value test",
-			args:       `/print "foo bar"`,
 			configPath: "./examples/helloWorld/simple.yaml",
 			want: SlashCommand{
 				Name:        "Print",
@@ -158,7 +148,7 @@ func TestNewSlashCommand(t *testing.T) {
 
 			slashDef, _ := ioutil.ReadFile(test.configPath)
 
-			newSlash, err := NewSlashCommand(test.args, slashDef)
+			newSlash, err := NewSlashCommand(slashDef)
 			if err != nil {
 				assert.Equal(t, test.expectedError, err)
 			}
@@ -169,11 +159,8 @@ func TestNewSlashCommand(t *testing.T) {
 
 func TestGetSlashHelp(t *testing.T) {
 	testYamlPath := "./examples/helloWorld/simple.yaml"
-
-	args := "/print"
-
 	slashDef, _ := ioutil.ReadFile(testYamlPath)
-	newSlash, _ := NewSlashCommand(args, slashDef)
+	newSlash, _ := NewSlashCommand(slashDef)
 
 	got := newSlash.GetSlashHelp()
 
@@ -229,7 +216,7 @@ func TestGetCommandString(t *testing.T) {
 			testYamlPath := "./examples/helloWorld/simple.yaml"
 
 			slashDef, _ := ioutil.ReadFile(testYamlPath)
-			newSlash, _ := NewSlashCommand(test.args, slashDef)
+			newSlash, _ := NewSlashCommand(slashDef)
 			got, err := newSlash.getCommandString(test.args)
 			if err != nil {
 				assert.Equal(t, test.expectError, true)
@@ -249,7 +236,7 @@ func TestGetPositionalArgs(t *testing.T) {
 func TestGetValues(t *testing.T) {
 
 	commandAndArgs := "/print foo"
-	newSlash, _ := NewSlashCommand(commandAndArgs, SimpleDef)
+	newSlash, _ := NewSlashCommand(SimpleDef)
 	got, _ := newSlash.getValues(commandAndArgs)
 
 	want := map[string]string{"text": "foo"}
@@ -262,7 +249,7 @@ func TestParse(t *testing.T) {
 	wantCommands := "Print"
 	wantValues := map[string]string{"text": "foo"}
 
-	newSlash, _ := NewSlashCommand(slashCommandString, SimpleDef)
+	newSlash, _ := NewSlashCommand(SimpleDef)
 	gotCommands, gotValues, _ := newSlash.Parse(slashCommandString)
 
 	assert.Equal(t, gotCommands, wantCommands)
