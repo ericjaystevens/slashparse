@@ -25,10 +25,9 @@ type Argument struct {
 
 //SlashCommand defines the structure of a slash command string
 type SlashCommand struct {
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description"`
-	Arguments   []Argument `yaml:"arguments"`
-	Values      map[string]string
+	Name        string       `yaml:"name"`
+	Description string       `yaml:"description"`
+	Arguments   []Argument   `yaml:"arguments"`
 	SubCommands []SubCommand `yaml:"subcommands"`
 }
 
@@ -54,7 +53,6 @@ func NewSlashCommand(args string, slashDef []byte) (s SlashCommand, err error) {
 	}
 
 	var argErr error
-	s.Values, argErr = s.getValues(args)
 	if argErr != nil {
 		return SlashCommand{}, argErr
 	}

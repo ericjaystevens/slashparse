@@ -41,7 +41,6 @@ func TestNewSlashCommand(t *testing.T) {
 						Position:    1,
 					},
 				},
-				Values: map[string]string{},
 				SubCommands: []SubCommand{
 					SubCommand{
 						Name:        "reverse",
@@ -107,9 +106,6 @@ func TestNewSlashCommand(t *testing.T) {
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 						Position:    1,
 					},
-				},
-				Values: map[string]string{
-					"text": "foo bar",
 				},
 				SubCommands: []SubCommand{
 					SubCommand{
