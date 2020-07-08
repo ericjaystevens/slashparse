@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 type newSlashCommandTests struct {
@@ -254,4 +255,15 @@ func TestParse(t *testing.T) {
 
 	assert.Equal(t, gotCommands, wantCommands)
 	assert.Equal(t, gotValues, wantValues)
+}
+
+//TODO: move simple2 to a test data folder, create more test yaml some that should validate and some that shouldn't
+func TestValidateSlashDefinition(t *testing.T) {
+	s := SlashCommand{}
+
+	yamldoc, _ := ioutil.ReadFile("./simple2.yaml")
+	_ = yaml.Unmarshal([]byte(yamldoc), &s)
+
+	got := validateSlashDefinition(&s)
+	assert.Nil(t, got)
 }

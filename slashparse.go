@@ -2,9 +2,11 @@ package slashparse
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"strings"
 
+	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
 )
 
@@ -206,4 +208,23 @@ func GetPositionalArgs(argString string) []string {
 		args = append(args, currentArg)
 	}
 	return args
+}
+
+func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
+	schemaLoader := gojsonschema.NewReferenceLoader(`file://C:/Users/eric/code/slashparse/schema.json`)
+
+	documentLoader := gojsonschema.NewGoLoader(&slashCommandDef)
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		return err
+	}
+
+	if result.Valid() {
+		return nil
+	}
+	log.Fatalf("The document is not valid. see errors :\n")
+	for _, desc := range result.Errors() {
+		log.Fatalf("- %s\n", desc)
+	}
+	return errors.New("Slash Command Deffinitaion is not valid")
 }

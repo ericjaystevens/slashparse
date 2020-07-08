@@ -1,0 +1,19 @@
+{
+  "$id": "https://example.com/person.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SlashCommand",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The Name of the Slash Command."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of what the slash command does"
+    },
+    "arguments": {
+      "description": "Pass these to your slash command"
+    }
+  }
+}
