@@ -258,12 +258,42 @@ func TestParse(t *testing.T) {
 }
 
 //TODO: move simple2 to a test data folder, create more test yaml some that should validate and some that shouldn't
+const testDataDir = "./testData"
+
+type validateSlashDefinitionTests struct {
+	testName      string
+	yamlName      string
+	shouldBeValid bool
+}
+
 func TestValidateSlashDefinition(t *testing.T) {
-	s := SlashCommand{}
+	tests := []validateSlashDefinitionTests{
+		{
+			testName:      "test simple yaml file",
+			yamlName:      "simple2.yaml",
+			shouldBeValid: true,
+		},
+		{
+			testName:      "test bad yaml file",
+			yamlName:      "badDeffinition1.yaml",
+			shouldBeValid: false,
+		},
+	}
 
-	yamldoc, _ := ioutil.ReadFile("./simple2.yaml")
-	_ = yaml.Unmarshal([]byte(yamldoc), &s)
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			s := SlashCommand{}
 
-	got := validateSlashDefinition(&s)
-	assert.Nil(t, got)
+			yamldoc, _ := ioutil.ReadFile(testDataDir + "/" + test.yamlName)
+			_ = yaml.Unmarshal([]byte(yamldoc), &s)
+
+			got := validateSlashDefinition(&s)
+
+			if test.shouldBeValid {
+				assert.Nil(t, got)
+			} else {
+				assert.NotNil(t, got)
+			}
+		})
+	}
 }

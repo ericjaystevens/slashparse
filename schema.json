@@ -15,5 +15,6 @@
     "arguments": {
       "description": "Pass these to your slash command"
     }
-  }
+  },
+  "required": ["name", "description"]
 }
