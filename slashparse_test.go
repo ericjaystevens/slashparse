@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 type newSlashCommandTests struct {
@@ -254,4 +255,45 @@ func TestParse(t *testing.T) {
 
 	assert.Equal(t, gotCommands, wantCommands)
 	assert.Equal(t, gotValues, wantValues)
+}
+
+//TODO: move simple2 to a test data folder, create more test yaml some that should validate and some that shouldn't
+const testDataDir = "./testData"
+
+type validateSlashDefinitionTests struct {
+	testName      string
+	yamlName      string
+	shouldBeValid bool
+}
+
+func TestValidateSlashDefinition(t *testing.T) {
+	tests := []validateSlashDefinitionTests{
+		{
+			testName:      "test simple yaml file",
+			yamlName:      "simple2.yaml",
+			shouldBeValid: true,
+		},
+		{
+			testName:      "test bad yaml file",
+			yamlName:      "badDeffinition1.yaml",
+			shouldBeValid: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			s := SlashCommand{}
+
+			yamldoc, _ := ioutil.ReadFile(testDataDir + "/" + test.yamlName)
+			_ = yaml.Unmarshal([]byte(yamldoc), &s)
+
+			got := validateSlashDefinition(&s)
+
+			if test.shouldBeValid {
+				assert.Nil(t, got)
+			} else {
+				assert.NotNil(t, got)
+			}
+		})
+	}
 }

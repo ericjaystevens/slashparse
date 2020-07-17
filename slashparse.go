@@ -2,9 +2,11 @@ package slashparse
 
 import (
 	"errors"
+	"log"
 	"regexp"
 	"strings"
 
+	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
 )
 
@@ -16,27 +18,28 @@ const (
 
 //Argument defines and argument in a slash command
 type Argument struct {
-	Name        string `yaml:"name"`
-	ArgType     string `yaml:"argtype"`
-	Description string `yaml:"description"`
-	ErrorMsg    string `yaml:"errorMsg"`
-	Position    int    `yaml:"position"`
+	Name        string `yaml:"name" json:"name"`
+	ArgType     string `yaml:"argtype" json:"argtype"`
+	Description string `yaml:"description" json:"description"`
+	ErrorMsg    string `yaml:"errorMsg" json:"errorMsg"`
+	Position    int    `yaml:"position" json:"position"`
+	Required    bool   `yaml:"required" json:"required"`
 }
 
 //SlashCommand defines the structure of a slash command string
 type SlashCommand struct {
-	Name        string       `yaml:"name"`
-	Description string       `yaml:"description"`
-	Arguments   []Argument   `yaml:"arguments"`
-	SubCommands []SubCommand `yaml:"subcommands"`
+	Name        string       `yaml:"name" json:"name,omitempty"`
+	Description string       `yaml:"description" json:"description"`
+	Arguments   []Argument   `yaml:"arguments" json:"arguments,omitempty"`
+	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
 }
 
 //SubCommand defines a command that proceded the slash command
 type SubCommand struct {
-	Name        string       `yaml:"name"`
-	Description string       `yaml:"description"`
-	Arguments   []Argument   `yaml:"arguments"`
-	SubCommands []SubCommand `yaml:"subcommands"`
+	Name        string       `yaml:"name" json:"name"`
+	Description string       `yaml:"description" json:"description"`
+	Arguments   []Argument   `yaml:"arguments" json:"arguments"`
+	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -46,11 +49,10 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 		return s, unmarshalErr
 	}
 
-	var argErr error
-	if argErr != nil {
-		return SlashCommand{}, argErr
+	validationErr := validateSlashDefinition(&s)
+	if validationErr != nil {
+		return s, validationErr
 	}
-
 	return s, nil
 }
 
@@ -206,4 +208,23 @@ func GetPositionalArgs(argString string) []string {
 		args = append(args, currentArg)
 	}
 	return args
+}
+
+func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
+	schemaLoader := gojsonschema.NewReferenceLoader(`file://C:/Users/eric/code/slashparse/schema.json`)
+
+	documentLoader := gojsonschema.NewGoLoader(&slashCommandDef)
+	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	if err != nil {
+		return err
+	}
+
+	if result.Valid() {
+		return nil
+	}
+	log.Printf("The document is not valid. see errors :\n")
+	for _, desc := range result.Errors() {
+		log.Printf("- %s\n", desc)
+	}
+	return errors.New("Slash Command Deffinitaion is not valid")
 }

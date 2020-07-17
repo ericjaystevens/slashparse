@@ -1,0 +1,141 @@
+{
+  "$id": "https://example.com/person.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SlashCommand",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The Name of the Slash Command."
+    },
+    "description": {
+      "type": "string",
+      "description": "A description of what the slash command does"
+    },
+    "arguments": {
+      "type": "array",
+      "description": "Pass these to your slash command",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of argument of Slash command"
+        },
+        "argtype": {
+          "type": "string",
+          "description": "SlashParse built-in argument types",
+          "enum": ["word", "number", "quoted text", "date", "time", "remaining text"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the argument being passed"
+        },
+        "errorMsg": {
+          "type": "string",
+          "description": "custom error message if argument does not meet requirements"
+        },
+        "position": {
+          "type": "number",
+          "description": "poition of the argument relative to the slash command"
+        },
+        "required": {
+         "type": "boolean",
+         "description": "If the arguemnt is required" 
+        }
+      },
+      "required": ["name", "argtype", "description"]
+    },
+    "subcommands": {
+      "type": "array",
+      "description": "A Sub command of the slash command, often a noun",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of sub command"
+        },
+        "description": {
+          "type": "string",
+          "description": "description of sub command"
+        },
+        "arguments": {
+          "description": "Pass these to your slash sub command",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of argument of Slash sub command"
+            },
+            "argtype": {
+              "type": "string",
+              "description": "SlashParse built-in argument types",
+              "enum": ["word", "number", "quoted text", "date", "time", "remaining text"]
+            },
+            "description": {
+              "type": "string",
+              "description": "Description of the argument being passed to the sub command"
+            },
+            "errorMsg": {
+              "type": "string",
+              "description": "custom error message if argument does not meet requirements"
+            },
+            "position": {
+              "type": "number",
+              "description": "poition of the argument relative to the slash sub command"
+            },
+            "required": {
+            "type": "boolean",
+            "description": "Is the arguemnt required?" 
+            }
+          },
+          "required": ["name", "argtype", "description"]
+        },
+        "subcommands": {
+          "type": "array",
+          "description": "a sub sub command",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Name of sub sub command, often an action word"
+            },
+            "description": {
+              "type": "string",
+              "description": "description of a sub sub command"
+            },
+            "arguments": {
+              "description": "Pass these to your slash sub-sub command",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of argument of Slash sub-sub command"
+                },
+                "argtype": {
+                  "type": "string",
+                  "description": "SlashParse built-in argument types",
+                  "enum": ["word", "number", "quoted text", "date", "time", "remaining text"]
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the argument being passed to the sub-sub command"
+                },
+                "errorMsg": {
+                  "type": "string",
+                  "description": "custom error message if argument does not meet requirements"
+                },
+                "position": {
+                  "type": "number",
+                  "description": "poition of the argument relative to the slash sub-sub command"
+                },
+                "required": {
+                "type": "boolean",
+                "description": "If the arguemnt is required" 
+                }
+              },
+              "required": ["name", "argtype", "description"]
+            }
+          },
+          "required": ["name", "description"]
+        }
+      },
+      "required": ["name", "description"]
+    }
+  },
+  "required": ["name", "description"]
+}
