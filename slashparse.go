@@ -23,7 +23,7 @@ type Argument struct {
 	Description string `yaml:"description" json:"description"`
 	ErrorMsg    string `yaml:"errorMsg" json:"errorMsg"`
 	Position    int    `yaml:"position" json:"position"`
-	Required bool `yaml:"required" json:"required"`
+	Required    bool   `yaml:"required" json:"required"`
 }
 
 //SlashCommand defines the structure of a slash command string
@@ -49,11 +49,10 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 		return s, unmarshalErr
 	}
 
-	var argErr error
-	if argErr != nil {
-		return SlashCommand{}, argErr
+	validationErr := validateSlashDefinition(&s)
+	if validationErr != nil {
+		return s, validationErr
 	}
-
 	return s, nil
 }
 
