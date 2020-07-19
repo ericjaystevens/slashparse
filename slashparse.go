@@ -58,17 +58,21 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 
 //GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
-	header := "## " + s.Name + " Help"
+	header := "#### /" + s.Name + " Help"
 
-	description := "* " + s.Description + " *"
+	description := "-- *" + s.Description + "*"
 
-	arguments := "### Arguments"
+	argumentSet := "`/" + strings.ToLower(s.Name)
+
+	arguments := "#### Arguments"
 
 	//for each argument in arguments print name.
 	for _, argument := range s.Arguments {
-		arguments += "\n\n* " + argument.Name + ": " + argument.Description
+		arguments += "\n\n* **" + argument.Name + "**: (optional) _" + argument.Description + "_"
+		argumentSet += " [" + argument.Name + "]"
 	}
-	return header + "\n" + description + "\n\n" + arguments + "\n"
+	argumentSet += "`"
+	return header + "\n" + description + "\n\n" + argumentSet + "\n\n" + arguments + "\n"
 }
 
 //getValues takes a command and arguments and gets a dictionary of values by argument name

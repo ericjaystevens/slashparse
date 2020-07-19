@@ -165,12 +165,14 @@ func TestGetSlashHelp(t *testing.T) {
 
 	got := newSlash.GetSlashHelp()
 
-	want := `## Print Help
-* Echos back what you type. *
+	want := `#### /Print Help
+-- *Echos back what you type.*
 
-### Arguments
+` + "`" + `/print [text]` + "`" + `
 
-* text: text you want to print
+#### Arguments
+
+* **text**: (optional) _text you want to print_
 `
 	assert.Equal(t, want, got)
 }
