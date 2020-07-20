@@ -1,0 +1,8 @@
+#### /{{.Name}} Help
+-- *Echos back what you type.*
+
+`/print [text]`
+
+#### Arguments
+
+* **text**: (optional) _text you want to print_

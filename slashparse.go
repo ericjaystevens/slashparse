@@ -1,10 +1,12 @@
 package slashparse
 
 import (
+	"bytes"
 	"errors"
 	"log"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
@@ -58,21 +60,35 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 
 //GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
-	header := "#### /" + s.Name + " Help"
 
-	description := "-- *" + s.Description + "*"
+	helpTemplate, err := template.ParseFiles("./templates/standardHelp.template")
+	if err != nil {
+		return ""
+	}
 
-	argumentSet := "`/" + strings.ToLower(s.Name)
+	var tpl bytes.Buffer
+	if err := helpTemplate.Execute(&tpl, s); err != nil {
+		return ""
+	}
 
-	arguments := "#### Arguments"
+	result := tpl.String()
+	return result
+
+	//	header := "#### /" + s.Name + " Help"
+
+	//	description := "-- *" + s.Description + "*"
+
+	//	argumentSet := "`/" + strings.ToLower(s.Name)
+
+	//	arguments := "#### Arguments"
 
 	//for each argument in arguments print name.
-	for _, argument := range s.Arguments {
-		arguments += "\n\n* **" + argument.Name + "**: (optional) _" + argument.Description + "_"
-		argumentSet += " [" + argument.Name + "]"
-	}
-	argumentSet += "`"
-	return header + "\n" + description + "\n\n" + argumentSet + "\n\n" + arguments + "\n"
+	//	for _, argument := range s.Arguments {
+	//arguments += "\n\n* **" + argument.Name + "**: (optional) _" + argument.Description + "_"
+	//argumentSet += " [" + argument.Name + "]"
+	//}
+	//argumentSet += "`"
+	//return header + "\n" + description + "\n\n" + argumentSet + "\n\n" + arguments + "\n"
 }
 
 //getValues takes a command and arguments and gets a dictionary of values by argument name
