@@ -173,6 +173,17 @@ func TestGetSlashHelp(t *testing.T) {
 #### Arguments
 
 * **text**: (optional) _text you want to print_
+
+#### Available Commands
+
+* **reverse**: _reverses back what you type_  
+  ` + "`" + `/print reverse [text]` + "`" +
+		`* **quote**: _helps you stand on the shoulders of giants by using words from histories most articulate people_ 
+  * **random**: provides a random quote
+    ` + "`" + `/prting quote random` + "`" +
+		`* **author**: specify an author
+    ` + "`" + `/print quote random [text]` + "`" +
+		`* **help**: Display usage
 `
 	assert.Equal(t, want, got)
 }
