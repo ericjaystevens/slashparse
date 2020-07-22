@@ -61,7 +61,11 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 //GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
 
-	helpTemplate, err := template.ParseFiles("./templates/standardHelp.template")
+	funcMap := template.FuncMap{
+		"ToLower": strings.ToLower,
+	}
+
+	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).ParseFiles("./templates/standardHelp.tpl")
 	if err != nil {
 		return ""
 	}
