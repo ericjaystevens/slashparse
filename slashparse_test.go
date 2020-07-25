@@ -176,7 +176,7 @@ func TestGetSlashHelp(t *testing.T) {
 
 #### Available Commands
 
-* **reverse**: _reverses back what you type_  
+* **reverse**: _reverses back what you type._
   ` + "`" + `/print reverse [text]` + "`" +
 		`* **quote**: _helps you stand on the shoulders of giants by using words from histories most articulate people_ 
   * **random**: provides a random quote
