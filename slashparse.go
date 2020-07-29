@@ -60,39 +60,24 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 
 //GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
-
 	funcMap := template.FuncMap{
 		"ToLower": strings.ToLower,
 	}
 
 	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).ParseFiles("./templates/standardHelp.tpl")
 	if err != nil {
+		log.Printf("Unable to load help template. %s", err.Error())
 		return ""
 	}
 
 	var tpl bytes.Buffer
 	if err := helpTemplate.Execute(&tpl, s); err != nil {
+		log.Printf("Unable to execute help template. %s", err.Error())
 		return ""
 	}
 
 	result := tpl.String()
 	return result
-
-	//	header := "#### /" + s.Name + " Help"
-
-	//	description := "-- *" + s.Description + "*"
-
-	//	argumentSet := "`/" + strings.ToLower(s.Name)
-
-	//	arguments := "#### Arguments"
-
-	//for each argument in arguments print name.
-	//	for _, argument := range s.Arguments {
-	//arguments += "\n\n* **" + argument.Name + "**: (optional) _" + argument.Description + "_"
-	//argumentSet += " [" + argument.Name + "]"
-	//}
-	//argumentSet += "`"
-	//return header + "\n" + description + "\n\n" + argumentSet + "\n\n" + arguments + "\n"
 }
 
 //getValues takes a command and arguments and gets a dictionary of values by argument name
