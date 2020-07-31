@@ -64,7 +64,8 @@ func (s *SlashCommand) GetSlashHelp() string {
 		"ToLower": strings.ToLower,
 	}
 
-	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).ParseFiles("./templates/standardHelp.tpl")
+	//	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).ParseFiles("./templates/standardHelp.tpl")
+	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).Parse(helpTemplateContent)
 	if err != nil {
 		log.Printf("Unable to load help template. %s", err.Error())
 		return ""
@@ -220,8 +221,7 @@ func GetPositionalArgs(argString string) []string {
 }
 
 func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
-	schemaLoader := gojsonschema.NewReferenceLoader(`file://C:/Users/eric/code/slashparse/schema.json`)
-
+	schemaLoader := gojsonschema.NewBytesLoader([]byte(jsonSchemaContent))
 	documentLoader := gojsonschema.NewGoLoader(&slashCommandDef)
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
@@ -235,5 +235,5 @@ func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
 	for _, desc := range result.Errors() {
 		log.Printf("- %s\n", desc)
 	}
-	return errors.New("Slash Command Deffinitaion is not valid")
+	return errors.New("Slash Command Definition is not valid")
 }
