@@ -1,5 +1,5 @@
-
 // THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE templates/standardHelp.tpl and run generate/generateFromStatic.go
+
 package slashparse
 
 const helpTemplateContent ="#### /{{.Name}} Help\n-- *{{.Description}}*\n\n`/{{ .Name | ToLower }}{{range $arg := .Arguments}} {{if not $arg.Required}}[{{end}}{{$arg.Name}}{{if not $arg.Required}}]{{end}}{{end}}`\n\n#### Arguments\n{{range $arg := .Arguments}}\n* **{{$arg.Name}}**: {{if not $arg.Required}}(optional){{end}} _{{$arg.Description}}_\n{{end}}\n#### Available Commands\n{{range $subCommand := .SubCommands }}\n* **{{$subCommand.Name}}**: _{{$subCommand.Description}}_\n  `/{{$.Name | ToLower}} {{$subCommand.Name}} {{range $arg := $subCommand.Arguments}}{{if not $arg.Required}}[{{end}}{{$arg.Name}}{{if not $arg.Required}}]{{end}}{{end}}`\n  {{range $subSubCommand := .SubCommands}}  *  **{{$subSubCommand.Name}}**: {{$subSubCommand.Description}}\n    `/{{$.Name}} {{$subCommand.Name}} {{$subSubCommand.Name}} {{range $arg := $subSubCommand.Arguments}}{{if not $arg.Required}}[{{end}}{{$arg.Name}}{{if not $arg.Required}}]{{end}}{{end}}`{{end}}\n{{end}}"
