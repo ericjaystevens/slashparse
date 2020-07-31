@@ -1,3 +1,4 @@
+// Package slashparse is a parser for slash commands.
 package slashparse
 
 import (

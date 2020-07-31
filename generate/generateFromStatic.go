@@ -17,8 +17,8 @@ func main() {
 	}
 	jsonSchemaText := strconv.Quote(string(dat))
 
-	codeStart := `
-// THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE schema.json and run generate/generateFromStatic.go
+	codeStart := `// THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE schema.json and run generate/generateFromStatic.go
+	
 package slashparse
 
 const jsonSchemaContent =`
@@ -38,8 +38,8 @@ const jsonSchemaContent =`
 	}
 	helpTemplateText := strconv.Quote(string(dat))
 
-	genCode = `
-// THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE templates/standardHelp.tpl and run generate/generateFromStatic.go
+	genCode = `// THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE templates/standardHelp.tpl and run generate/generateFromStatic.go
+
 package slashparse
 
 const helpTemplateContent =` + helpTemplateText
