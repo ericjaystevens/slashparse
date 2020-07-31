@@ -158,23 +158,6 @@ func TestNewSlashCommand(t *testing.T) {
 	}
 }
 
-func TestGetSlashHelp(t *testing.T) {
-	testYamlPath := "./examples/helloWorld/simple.yaml"
-	slashDef, _ := ioutil.ReadFile(testYamlPath)
-	newSlash, _ := NewSlashCommand(slashDef)
-
-	got := newSlash.GetSlashHelp()
-
-	want := `## Print Help
-* Echos back what you type. *
-
-### Arguments
-
-* text: text you want to print
-`
-	assert.Equal(t, want, got)
-}
-
 type getCommandStringTests struct {
 	testName    string
 	args        string

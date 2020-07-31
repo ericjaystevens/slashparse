@@ -1,10 +1,12 @@
 package slashparse
 
 import (
+	"bytes"
 	"errors"
 	"log"
 	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v2"
@@ -58,17 +60,25 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 
 //GetSlashHelp returns a markdown formated help for a slash command
 func (s *SlashCommand) GetSlashHelp() string {
-	header := "## " + s.Name + " Help"
-
-	description := "* " + s.Description + " *"
-
-	arguments := "### Arguments"
-
-	//for each argument in arguments print name.
-	for _, argument := range s.Arguments {
-		arguments += "\n\n* " + argument.Name + ": " + argument.Description
+	funcMap := template.FuncMap{
+		"ToLower": strings.ToLower,
 	}
-	return header + "\n" + description + "\n\n" + arguments + "\n"
+
+	//	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).ParseFiles("./templates/standardHelp.tpl")
+	helpTemplate, err := template.New("standardHelp.tpl").Funcs(funcMap).Parse(helpTemplateContent)
+	if err != nil {
+		log.Printf("Unable to load help template. %s", err.Error())
+		return ""
+	}
+
+	var tpl bytes.Buffer
+	if err := helpTemplate.Execute(&tpl, s); err != nil {
+		log.Printf("Unable to execute help template. %s", err.Error())
+		return ""
+	}
+
+	result := tpl.String()
+	return result
 }
 
 //getValues takes a command and arguments and gets a dictionary of values by argument name
@@ -211,8 +221,7 @@ func GetPositionalArgs(argString string) []string {
 }
 
 func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
-	schemaLoader := gojsonschema.NewReferenceLoader(`file://C:/Users/eric/code/slashparse/schema.json`)
-
+	schemaLoader := gojsonschema.NewBytesLoader([]byte(jsonSchemaContent))
 	documentLoader := gojsonschema.NewGoLoader(&slashCommandDef)
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
@@ -226,5 +235,5 @@ func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
 	for _, desc := range result.Errors() {
 		log.Printf("- %s\n", desc)
 	}
-	return errors.New("Slash Command Deffinitaion is not valid")
+	return errors.New("Slash Command Definition is not valid")
 }
