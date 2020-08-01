@@ -292,3 +292,16 @@ func TestSetHandler(t *testing.T) {
 
 	assert.Nil(t, got)
 }
+
+func testInvokeHandler(t *testing.T) {
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	commandString, values, _ := newSlash.Parse("/print reverse pickle")
+	myHandler := func(args map[string]string) (string, error) {
+		return "reverseHandler called with text set as " + args["text"], nil
+	}
+
+	_ = newSlash.SetHandler(commandString, myHandler)
+	got, _ := newSlash.invokeHandler(commandString, values)
+
+	assert.Equal(t, got, "reverseHandler called with text set as pickle")
+}

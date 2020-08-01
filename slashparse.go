@@ -60,9 +60,35 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 	return s, nil
 }
 
+// getCommandPath gets the full command path that should call a command or sub command
+// hardcoded for now
+func (s *SubCommand) getCommandPath() string {
+	return "print reverse"
+}
+
 // SetHandler sets the function that should be called based on the set of slash command and subcommands
 func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
+
+	for _, subCommand := range s.SubCommands {
+		commandPath := subCommand.getCommandPath()
+
+		if strings.EqualFold(commandString, commandPath) {
+			subCommand.handler = handler
+		}
+	}
 	return nil
+}
+
+func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
+
+	for _, subCommand := range s.SubCommands {
+		commandPath := subCommand.getCommandPath()
+
+		if strings.EqualFold(commandString, commandPath) {
+			return subCommand.handler(args)
+		}
+	}
+	return "", errors.New("Unable to invoke handler")
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
