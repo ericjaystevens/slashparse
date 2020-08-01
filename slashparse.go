@@ -37,7 +37,7 @@ type SlashCommand struct {
 	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
 }
 
-//SubCommand defines a command that proceded the slash command
+//SubCommand defines a command that proceeded the slash command
 type SubCommand struct {
 	Name        string       `yaml:"name" json:"name"`
 	Description string       `yaml:"description" json:"description"`
