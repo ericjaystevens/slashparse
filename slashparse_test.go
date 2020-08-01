@@ -280,3 +280,15 @@ func TestValidateSlashDefinition(t *testing.T) {
 		})
 	}
 }
+
+func TestSetHandler(t *testing.T) {
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	commandString, _, _ := newSlash.Parse("/print reverse pickle")
+	myHandler := func(args map[string]string) (string, error) {
+		return "reverseHandler called with text set as " + args["text"], nil
+	}
+
+	got := newSlash.SetHandler(commandString, myHandler)
+
+	assert.Nil(t, got)
+}

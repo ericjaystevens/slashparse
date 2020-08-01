@@ -43,6 +43,7 @@ type SubCommand struct {
 	Description string       `yaml:"description" json:"description"`
 	Arguments   []Argument   `yaml:"arguments" json:"arguments"`
 	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
+	handler     func(map[string]string) (string, error)
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -57,6 +58,11 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 		return s, validationErr
 	}
 	return s, nil
+}
+
+// SetHandler sets the function that should be called based on the set of slash command and subcommands
+func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
+	return nil
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
