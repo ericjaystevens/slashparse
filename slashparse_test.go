@@ -293,15 +293,47 @@ func TestSetHandler(t *testing.T) {
 	assert.Nil(t, got)
 }
 
-func testInvokeHandler(t *testing.T) {
-	newSlash, _ := NewSlashCommand(SimpleDef)
-	commandString, values, _ := newSlash.Parse("/print reverse pickle")
-	myHandler := func(args map[string]string) (string, error) {
-		return "reverseHandler called with text set as " + args["text"], nil
+type invokeHandlerTests struct {
+	testName      string
+	commandString string
+	slashDef      []byte
+	want          string
+	handler       func(map[string]string) (string, error)
+}
+
+func TestInvokeHandler(t *testing.T) {
+
+	tests := []invokeHandlerTests{
+		{
+			testName:      "simple subCommand",
+			commandString: "/print quote",
+			slashDef:      SimpleDef,
+			want:          "quoteHandler called",
+			handler: func(args map[string]string) (string, error) {
+				return "quoteHandler called", nil
+			},
+		},
+		{
+			testName:      "subCommand with argument",
+			commandString: "/print reverse pickle",
+			slashDef:      SimpleDef,
+			want:          "reverseHandler called with text set as pickle",
+			handler: func(args map[string]string) (string, error) {
+				return "reverseHandler called with text set as " + args["text"], nil
+			},
+		},
 	}
 
-	_ = newSlash.SetHandler(commandString, myHandler)
-	got, _ := newSlash.invokeHandler(commandString, values)
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			newSlash, _ := NewSlashCommand(test.slashDef)
+			commandString, values, _ := newSlash.Parse(test.commandString)
 
-	assert.Equal(t, got, "reverseHandler called with text set as pickle")
+			_ = newSlash.SetHandler(commandString, test.handler)
+			got, _ := newSlash.invokeHandler(commandString, values)
+
+			assert.Equal(t, test.want, got)
+		})
+	}
+
 }

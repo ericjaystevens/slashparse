@@ -39,11 +39,12 @@ type SlashCommand struct {
 
 //SubCommand defines a command that proceeded the slash command
 type SubCommand struct {
-	Name        string       `yaml:"name" json:"name"`
-	Description string       `yaml:"description" json:"description"`
-	Arguments   []Argument   `yaml:"arguments" json:"arguments"`
-	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
-	handler     func(map[string]string) (string, error)
+	Name         string `yaml:"name" json:"name"`
+	commandPaths []string
+	Description  string       `yaml:"description" json:"description"`
+	Arguments    []Argument   `yaml:"arguments" json:"arguments"`
+	SubCommands  []SubCommand `yaml:"subcommands" json:"subcommands"`
+	handler      func(map[string]string) (string, error)
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -57,23 +58,34 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 	if validationErr != nil {
 		return s, validationErr
 	}
+
+	//range makes a copy so changes are not persistant, so use iterators instead
+	for subCommandPosition, subCommand := range s.SubCommands {
+		subCommandPath := s.Name + " " + subCommand.Name
+		s.SubCommands[subCommandPosition].commandPaths = append(subCommand.commandPaths, subCommandPath)
+		for subSubCommandPostion, subSubCommand := range subCommand.SubCommands {
+			subSubCommandPath := subCommandPath + " " + subSubCommand.Name
+			s.SubCommands[subCommandPosition].SubCommands[subSubCommandPostion].commandPaths = append(subSubCommand.commandPaths, subSubCommandPath)
+		}
+	}
 	return s, nil
 }
 
 // getCommandPath gets the full command path that should call a command or sub command
 // hardcoded for now
 func (s *SubCommand) getCommandPath() string {
-	return "print reverse"
+
+	return s.commandPaths[0]
 }
 
 // SetHandler sets the function that should be called based on the set of slash command and subcommands
 func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
 
-	for _, subCommand := range s.SubCommands {
-		commandPath := subCommand.getCommandPath()
+	for i, subCommand := range s.SubCommands {
+		commandPath := subCommand.getCommandPath() //throws panic
 
 		if strings.EqualFold(commandString, commandPath) {
-			subCommand.handler = handler
+			s.SubCommands[i].handler = handler
 		}
 	}
 	return nil
