@@ -39,11 +39,11 @@ type SlashCommand struct {
 
 //SubCommand defines a command that proceeded the slash command
 type SubCommand struct {
-	Name         string `yaml:"name" json:"name"`
-	commandPaths []string
+	Name         string       `yaml:"name" json:"name"`
 	Description  string       `yaml:"description" json:"description"`
 	Arguments    []Argument   `yaml:"arguments" json:"arguments"`
 	SubCommands  []SubCommand `yaml:"subcommands" json:"subcommands"`
+	commandPaths []string
 	handler      func(map[string]string) (string, error)
 }
 

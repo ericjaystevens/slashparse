@@ -52,6 +52,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Position:    0,
 							},
 						},
+						commandPaths: []string{"Print reverse"},
 					},
 					SubCommand{
 						Name:        "quote",
@@ -59,10 +60,11 @@ func TestNewSlashCommand(t *testing.T) {
 						Arguments:   []Argument(nil),
 						SubCommands: []SubCommand{
 							SubCommand{
-								Name:        "random",
-								Description: "print a random quote from the a random author",
-								Arguments:   []Argument(nil),
-								SubCommands: []SubCommand(nil),
+								Name:         "random",
+								Description:  "print a random quote from the a random author",
+								Arguments:    []Argument(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote random"},
 							},
 							SubCommand{
 								Name:        "author",
@@ -76,9 +78,11 @@ func TestNewSlashCommand(t *testing.T) {
 										Position:    0,
 									},
 								},
-								SubCommands: []SubCommand(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote author"},
 							},
 						},
+						commandPaths: []string{"Print quote"},
 					},
 				},
 			},
@@ -111,6 +115,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Position:    0,
 							},
 						},
+						commandPaths: []string{"Print reverse"},
 					},
 					SubCommand{
 						Name:        "quote",
@@ -118,10 +123,11 @@ func TestNewSlashCommand(t *testing.T) {
 						Arguments:   []Argument(nil),
 						SubCommands: []SubCommand{
 							SubCommand{
-								Name:        "random",
-								Description: "print a random quote from the a random author",
-								Arguments:   []Argument(nil),
-								SubCommands: []SubCommand(nil),
+								Name:         "random",
+								Description:  "print a random quote from the a random author",
+								Arguments:    []Argument(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote random"},
 							},
 							SubCommand{
 								Name:        "author",
@@ -135,9 +141,11 @@ func TestNewSlashCommand(t *testing.T) {
 										Position:    0,
 									},
 								},
-								SubCommands: []SubCommand(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote author"},
 							},
 						},
+						commandPaths: []string{"Print quote"},
 					},
 				},
 			},
