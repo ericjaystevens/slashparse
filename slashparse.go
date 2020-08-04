@@ -37,12 +37,14 @@ type SlashCommand struct {
 	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
 }
 
-//SubCommand defines a command that proceded the slash command
+//SubCommand defines a command that proceeded the slash command
 type SubCommand struct {
-	Name        string       `yaml:"name" json:"name"`
-	Description string       `yaml:"description" json:"description"`
-	Arguments   []Argument   `yaml:"arguments" json:"arguments"`
-	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
+	Name         string       `yaml:"name" json:"name"`
+	Description  string       `yaml:"description" json:"description"`
+	Arguments    []Argument   `yaml:"arguments" json:"arguments"`
+	SubCommands  []SubCommand `yaml:"subcommands" json:"subcommands"`
+	commandPaths []string
+	handler      func(map[string]string) (string, error)
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -56,7 +58,60 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 	if validationErr != nil {
 		return s, validationErr
 	}
+
+	//range makes a copy so changes are not persistant, so use iterators instead
+	for subCommandPosition, subCommand := range s.SubCommands {
+		subCommandPath := s.Name + " " + subCommand.Name
+		s.SubCommands[subCommandPosition].commandPaths = append(subCommand.commandPaths, subCommandPath)
+		for subSubCommandPostion, subSubCommand := range subCommand.SubCommands {
+			subSubCommandPath := subCommandPath + " " + subSubCommand.Name
+			s.SubCommands[subCommandPosition].SubCommands[subSubCommandPostion].commandPaths = append(subSubCommand.commandPaths, subSubCommandPath)
+		}
+	}
+
+	//Add built-in help subcommand
+
+	helpSubcommand := SubCommand{
+		Name:         "help",
+		Description:  "Display help.",
+		commandPaths: []string{s.Name + " help"},
+		handler:      func(args map[string]string) (string, error) { return s.GetSlashHelp(), nil },
+	}
+	s.SubCommands = append(s.SubCommands, helpSubcommand)
 	return s, nil
+}
+
+// getCommandPath gets the full command path that should call a command or sub command
+// hardcoded for now
+func (s *SubCommand) getCommandPath() string {
+
+	//this will need to be changed to a matching method when muliple command paths are supported (aliases or reversable subcommands)
+	return s.commandPaths[0]
+}
+
+// SetHandler sets the function that should be called based on the set of slash command and subcommands
+func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
+
+	for i, subCommand := range s.SubCommands {
+		commandPath := subCommand.getCommandPath() //throws panic
+
+		if strings.EqualFold(commandString, commandPath) {
+			s.SubCommands[i].handler = handler
+		}
+	}
+	return nil
+}
+
+func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
+
+	for _, subCommand := range s.SubCommands {
+		commandPath := subCommand.getCommandPath()
+
+		if strings.EqualFold(commandString, commandPath) {
+			return subCommand.handler(args)
+		}
+	}
+	return "", errors.New("Unable to invoke handler")
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
@@ -169,6 +224,13 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 	}
 
 	return commandString, values, nil
+}
+
+//Execute parses and runs the configured handler to process your command.
+func (s *SlashCommand) Execute(slashString string) (string, error) {
+	commandString, values, _ := s.Parse(slashString)
+	msg, err := s.invokeHandler(commandString, values)
+	return msg, err
 }
 
 //GetPositionalArgs takes a string of arguments and splits it up by spaces and double quotes

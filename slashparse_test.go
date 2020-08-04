@@ -52,6 +52,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Position:    0,
 							},
 						},
+						commandPaths: []string{"Print reverse"},
 					},
 					SubCommand{
 						Name:        "quote",
@@ -59,10 +60,11 @@ func TestNewSlashCommand(t *testing.T) {
 						Arguments:   []Argument(nil),
 						SubCommands: []SubCommand{
 							SubCommand{
-								Name:        "random",
-								Description: "print a random quote from the a random author",
-								Arguments:   []Argument(nil),
-								SubCommands: []SubCommand(nil),
+								Name:         "random",
+								Description:  "print a random quote from the a random author",
+								Arguments:    []Argument(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote random"},
 							},
 							SubCommand{
 								Name:        "author",
@@ -76,9 +78,16 @@ func TestNewSlashCommand(t *testing.T) {
 										Position:    0,
 									},
 								},
-								SubCommands: []SubCommand(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote author"},
 							},
 						},
+						commandPaths: []string{"Print quote"},
+					},
+					SubCommand{
+						Name:         "help",
+						Description:  "Display help.",
+						commandPaths: []string{"Print help"},
 					},
 				},
 			},
@@ -111,6 +120,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Position:    0,
 							},
 						},
+						commandPaths: []string{"Print reverse"},
 					},
 					SubCommand{
 						Name:        "quote",
@@ -118,10 +128,11 @@ func TestNewSlashCommand(t *testing.T) {
 						Arguments:   []Argument(nil),
 						SubCommands: []SubCommand{
 							SubCommand{
-								Name:        "random",
-								Description: "print a random quote from the a random author",
-								Arguments:   []Argument(nil),
-								SubCommands: []SubCommand(nil),
+								Name:         "random",
+								Description:  "print a random quote from the a random author",
+								Arguments:    []Argument(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote random"},
 							},
 							SubCommand{
 								Name:        "author",
@@ -135,9 +146,16 @@ func TestNewSlashCommand(t *testing.T) {
 										Position:    0,
 									},
 								},
-								SubCommands: []SubCommand(nil),
+								SubCommands:  []SubCommand(nil),
+								commandPaths: []string{"Print quote author"},
 							},
 						},
+						commandPaths: []string{"Print quote"},
+					},
+					SubCommand{
+						Name:         "help",
+						Description:  "Display help.",
+						commandPaths: []string{"Print help"},
 					},
 				},
 			},
@@ -153,7 +171,11 @@ func TestNewSlashCommand(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, test.expectedError, err)
 			}
-			assert.Equal(t, test.want, newSlash)
+			assert.Equal(t, test.want.Name, newSlash.Name)
+			assert.Equal(t, test.want.Arguments, newSlash.Arguments)
+			assert.Equal(t, test.want.SubCommands[0], newSlash.SubCommands[0])
+			assert.Equal(t, test.want.SubCommands[1], newSlash.SubCommands[1])
+			assert.Equal(t, test.want.SubCommands[2].Name, newSlash.SubCommands[2].Name) //testing help with the handler set is tricky, so I tested around it.
 		})
 	}
 }
@@ -279,4 +301,73 @@ func TestValidateSlashDefinition(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSetHandler(t *testing.T) {
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	commandString, _, _ := newSlash.Parse("/print reverse pickle")
+	myHandler := func(args map[string]string) (string, error) {
+		return "reverseHandler called with text set as " + args["text"], nil
+	}
+
+	got := newSlash.SetHandler(commandString, myHandler)
+
+	assert.Nil(t, got)
+}
+
+type invokeHandlerTests struct {
+	testName      string
+	commandString string
+	slashDef      []byte
+	want          string
+	handler       func(map[string]string) (string, error)
+}
+
+func TestInvokeHandler(t *testing.T) {
+
+	tests := []invokeHandlerTests{
+		{
+			testName:      "simple subCommand",
+			commandString: "/print quote",
+			slashDef:      SimpleDef,
+			want:          "quoteHandler called",
+			handler: func(args map[string]string) (string, error) {
+				return "quoteHandler called", nil
+			},
+		},
+		{
+			testName:      "subCommand with argument",
+			commandString: "/print reverse pickle",
+			slashDef:      SimpleDef,
+			want:          "reverseHandler called with text set as pickle",
+			handler: func(args map[string]string) (string, error) {
+				return "reverseHandler called with text set as " + args["text"], nil
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			newSlash, _ := NewSlashCommand(test.slashDef)
+			commandString, values, _ := newSlash.Parse(test.commandString)
+
+			_ = newSlash.SetHandler(commandString, test.handler)
+			got, _ := newSlash.invokeHandler(commandString, values)
+
+			assert.Equal(t, test.want, got)
+		})
+	}
+
+}
+
+func TestExecute(t *testing.T) {
+	commandString := "/print reverse deep"
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
+		return "reverseHandler called with text set as " + args["text"], nil
+	})
+
+	want := "reverseHandler called with text set as deep"
+	got, _ := newSlash.Execute(commandString)
+	assert.Equal(t, want, got)
 }

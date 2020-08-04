@@ -18,12 +18,12 @@ func main() {
 	jsonSchemaText := strconv.Quote(string(dat))
 
 	codeStart := `// THIS  FILE IS GENERATED, DO NOT EDIT, INSTEAD UPDATE schema.json and run generate/generateFromStatic.go
-	
+
 package slashparse
 
-const jsonSchemaContent =`
+const jsonSchemaContent = `
 
-	genCode := codeStart + jsonSchemaText
+	genCode := codeStart + jsonSchemaText + "\n"
 	err = ioutil.WriteFile(outfilename, []byte(genCode), 0644)
 	if err != nil {
 		log.Print(err.Error())
@@ -42,7 +42,7 @@ const jsonSchemaContent =`
 
 package slashparse
 
-const helpTemplateContent =` + helpTemplateText
+const helpTemplateContent = ` + helpTemplateText + "\n"
 
 	err = ioutil.WriteFile(outfile, []byte(genCode), 0644)
 	if err != nil {
