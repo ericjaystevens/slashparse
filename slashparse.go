@@ -35,6 +35,7 @@ type SlashCommand struct {
 	Description string       `yaml:"description" json:"description"`
 	Arguments   []Argument   `yaml:"arguments" json:"arguments,omitempty"`
 	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
+	handler     func(map[string]string) (string, error)
 }
 
 //SubCommand defines a command that proceeded the slash command
@@ -92,6 +93,10 @@ func (s *SubCommand) getCommandPath() string {
 // SetHandler sets the function that should be called based on the set of slash command and subcommands
 func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
 
+	if strings.EqualFold(commandString, s.Name) {
+		s.handler = handler
+	}
+
 	for i, subCommand := range s.SubCommands {
 		commandPath := subCommand.getCommandPath() //throws panic
 
@@ -103,6 +108,10 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 }
 
 func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
+
+	if strings.EqualFold(commandString, s.Name) {
+		return s.handler(args)
+	}
 
 	for _, subCommand := range s.SubCommands {
 		commandPath := subCommand.getCommandPath()
@@ -183,7 +192,7 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 	command := strings.Replace(argsSplit[0], "/", "", 1)
 	args = strings.Replace(args, "/", "", 1)
 
-	//i hate this, regex might be better
+	//check each subcommand
 	for _, subCommand := range s.SubCommands {
 
 		for _, subSubCommand := range subCommand.SubCommands {
@@ -196,6 +205,7 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 
 		}
 
+		//check each sub sub command
 		subCommandString := s.Name + " " + subCommand.Name
 		if len(args) >= len(subCommandString) {
 			if strings.EqualFold(args[:len(subCommandString)], subCommandString) {

@@ -360,14 +360,43 @@ func TestInvokeHandler(t *testing.T) {
 
 }
 
-func TestExecute(t *testing.T) {
-	commandString := "/print reverse deep"
-	newSlash, _ := NewSlashCommand(SimpleDef)
-	newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
-		return "reverseHandler called with text set as " + args["text"], nil
-	})
+type executeTests struct {
+	name          string
+	commandString string
+	want          string
+}
 
-	want := "reverseHandler called with text set as deep"
-	got, _ := newSlash.Execute(commandString)
-	assert.Equal(t, want, got)
+func TestExecute(t *testing.T) {
+
+	tests := []executeTests{
+		{
+			name:          "slashCommand Test",
+			commandString: "/print echo",
+			want:          "print called with argument echo",
+		},
+		{
+			name:          "subcommand Test",
+			commandString: "/print reverse deep",
+			want:          "reverseHandler called with text set as deep",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			newSlash, _ := NewSlashCommand(SimpleDef)
+
+			newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
+				return "reverseHandler called with text set as " + args["text"], nil
+			})
+
+			newSlash.SetHandler("print", func(args map[string]string) (string, error) {
+				return "print called with argument " + args["text"], nil
+			})
+
+			got, _ := newSlash.Execute(test.commandString)
+			assert.Equal(t, test.want, got)
+
+		})
+	}
+
 }
