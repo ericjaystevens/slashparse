@@ -2,6 +2,7 @@ package slashparse
 
 import (
 	"io/ioutil"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -379,11 +380,20 @@ func TestExecute(t *testing.T) {
 			commandString: "/print reverse deep",
 			want:          "reverseHandler called with text set as deep",
 		},
+		{
+			name:          "sub sub command Test",
+			commandString: "/print quote author Shakespeare",
+			want:          "quoteAuthorHandler called with authorName set as Shakespeare",
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			newSlash, _ := NewSlashCommand(SimpleDef)
+
+			newSlash.SetHandler("print quote author", func(args map[string]string) (string, error) {
+				return "quoteAuthorHandler called with authorName set as " + args["authorName"], nil
+			})
 
 			newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
 				return "reverseHandler called with text set as " + args["text"], nil
@@ -399,4 +409,29 @@ func TestExecute(t *testing.T) {
 		})
 	}
 
+}
+
+func TestGetSubCommand(t *testing.T) {
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	commandString := "print quote random"
+	got, _ := newSlash.getSubCommand(commandString)
+	want := SubCommand{
+		Name:         "random",
+		Description:  "print a random quote from the a random author",
+		Arguments:    []Argument(nil),
+		SubCommands:  []SubCommand(nil),
+		commandPaths: []string{"Print quote random"},
+	}
+	assert.Equal(t, want, got)
+
+}
+
+func TestGetSlashHelp(t *testing.T) {
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	commandString := "print help"
+	got, _ := newSlash.Execute(commandString)
+
+	//just test the first line, to avoid so this doesn't have to be maintained while features are changeing so rapidly
+	firstLine := strings.Split(got, "\n")[0]
+	assert.Equal(t, firstLine, "#### /Print Help")
 }

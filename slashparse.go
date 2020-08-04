@@ -98,29 +98,33 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 	}
 
 	for i, subCommand := range s.SubCommands {
-		commandPath := subCommand.getCommandPath() //throws panic
+		commandPath := subCommand.getCommandPath()
 
 		if strings.EqualFold(commandString, commandPath) {
 			s.SubCommands[i].handler = handler
+		}
+
+		for subSubCommandPostion, subSubCommand := range subCommand.SubCommands {
+			subSubcommandPath := subSubCommand.getCommandPath()
+			if strings.EqualFold(commandString, subSubcommandPath) {
+				s.SubCommands[i].SubCommands[subSubCommandPostion].handler = handler
+			}
 		}
 	}
 	return nil
 }
 
 func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
-
 	if strings.EqualFold(commandString, s.Name) {
 		return s.handler(args)
 	}
 
-	for _, subCommand := range s.SubCommands {
-		commandPath := subCommand.getCommandPath()
-
-		if strings.EqualFold(commandString, commandPath) {
-			return subCommand.handler(args)
-		}
+	subCommand, err := s.getSubCommand(commandString)
+	if err != nil {
+		return "", err
 	}
-	return "", errors.New("Unable to invoke handler")
+
+	return subCommand.handler(args)
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
@@ -172,12 +176,30 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 	// need to go ordered here?
 	positionalArgs := GetPositionalArgs(args)
 
-	for _, slashArg := range s.Arguments {
+	if strings.EqualFold(command, s.Name) {
+		for _, slashArg := range s.Arguments {
+			position := slashArg.Position
+			if len(positionalArgs) >= position {
+				m[slashArg.Name] = positionalArgs[position-1]
+			}
+		}
+
+		return m, nil
+	}
+
+	subCommand, err := s.getSubCommand(command)
+	if err != nil {
+		return m, err
+	}
+
+	for _, slashArg := range subCommand.Arguments {
 		position := slashArg.Position
 		if len(positionalArgs) >= position {
-			m[slashArg.Name] = positionalArgs[position-1]
+			m[slashArg.Name] = positionalArgs[position]
 		}
+
 	}
+
 	return m, nil
 }
 
@@ -194,7 +216,6 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 
 	//check each subcommand
 	for _, subCommand := range s.SubCommands {
-
 		for _, subSubCommand := range subCommand.SubCommands {
 			subCommandString := s.Name + " " + subCommand.Name + " " + subSubCommand.Name
 			if len(args) >= len(subCommandString) {
@@ -202,7 +223,6 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 					return subCommandString, nil
 				}
 			}
-
 		}
 
 		//check each sub sub command
@@ -309,4 +329,25 @@ func validateSlashDefinition(slashCommandDef *SlashCommand) (err error) {
 		log.Printf("- %s\n", desc)
 	}
 	return errors.New("Slash Command Definition is not valid")
+}
+
+func (s *SlashCommand) getSubCommand(commandString string) (SubCommand, error) {
+
+	for _, subCommand := range s.SubCommands {
+
+		for _, path := range subCommand.commandPaths {
+			if strings.EqualFold(commandString, path) {
+				return subCommand, nil
+			}
+		}
+
+		for _, subSubCommand := range subCommand.SubCommands {
+			for _, path := range subSubCommand.commandPaths {
+				if strings.EqualFold(commandString, path) {
+					return subSubCommand, nil
+				}
+			}
+		}
+	}
+	return SubCommand{}, errors.New("Unable to find mathing subcommand")
 }
