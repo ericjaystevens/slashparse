@@ -84,6 +84,11 @@ func TestNewSlashCommand(t *testing.T) {
 						},
 						commandPaths: []string{"Print quote"},
 					},
+					SubCommand{
+						Name:         "help",
+						Description:  "Display help.",
+						commandPaths: []string{"Print help"},
+					},
 				},
 			},
 		},
@@ -147,6 +152,11 @@ func TestNewSlashCommand(t *testing.T) {
 						},
 						commandPaths: []string{"Print quote"},
 					},
+					SubCommand{
+						Name:         "help",
+						Description:  "Display help.",
+						commandPaths: []string{"Print help"},
+					},
 				},
 			},
 		},
@@ -161,7 +171,11 @@ func TestNewSlashCommand(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, test.expectedError, err)
 			}
-			assert.Equal(t, test.want, newSlash)
+			assert.Equal(t, test.want.Name, newSlash.Name)
+			assert.Equal(t, test.want.Arguments, newSlash.Arguments)
+			assert.Equal(t, test.want.SubCommands[0], newSlash.SubCommands[0])
+			assert.Equal(t, test.want.SubCommands[1], newSlash.SubCommands[1])
+			assert.Equal(t, test.want.SubCommands[2].Name, newSlash.SubCommands[2].Name) //testing help with the handler set is tricky, so I tested around it.
 		})
 	}
 }

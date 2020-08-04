@@ -68,6 +68,16 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 			s.SubCommands[subCommandPosition].SubCommands[subSubCommandPostion].commandPaths = append(subSubCommand.commandPaths, subSubCommandPath)
 		}
 	}
+
+	//Add built-in help subcommand
+
+	helpSubcommand := SubCommand{
+		Name:         "help",
+		Description:  "Display help.",
+		commandPaths: []string{s.Name + " help"},
+		handler:      func(args map[string]string) (string, error) { return s.GetSlashHelp(), nil },
+	}
+	s.SubCommands = append(s.SubCommands, helpSubcommand)
 	return s, nil
 }
 
@@ -75,6 +85,7 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 // hardcoded for now
 func (s *SubCommand) getCommandPath() string {
 
+	//this will need to be changed to a matching method when muliple command paths are supported (aliases or reversable subcommands)
 	return s.commandPaths[0]
 }
 
