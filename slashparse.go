@@ -226,6 +226,13 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 	return commandString, values, nil
 }
 
+//Execute parses and runs the configured handler to process your command.
+func (s *SlashCommand) Execute(slashString string) (string, error) {
+	commandString, values, _ := s.Parse(slashString)
+	msg, err := s.invokeHandler(commandString, values)
+	return msg, err
+}
+
 //GetPositionalArgs takes a string of arguments and splits it up by spaces and double quotes
 func GetPositionalArgs(argString string) []string {
 	var isQuoteText bool

@@ -359,3 +359,15 @@ func TestInvokeHandler(t *testing.T) {
 	}
 
 }
+
+func TestExecute(t *testing.T) {
+	commandString := "/print reverse deep"
+	newSlash, _ := NewSlashCommand(SimpleDef)
+	newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
+		return "reverseHandler called with text set as " + args["text"], nil
+	})
+
+	want := "reverseHandler called with text set as deep"
+	got, _ := newSlash.Execute(commandString)
+	assert.Equal(t, want, got)
+}
