@@ -5,7 +5,7 @@
 # slashparse
 Go module for parsing slash commands
 
-This is in the proof of concept stages of development, I'm not exactly sure how it will all turn out or if it has a lot of value.
+This is in the proof of concept stages of development, expect frequent breaking changes and bugs.
 
 ## Design Goals
 
@@ -19,6 +19,8 @@ This is in the proof of concept stages of development, I'm not exactly sure how 
 
 #### Define your slash command in Yaml
 
+You can use the provided Schema (schema.json), to validate and get autocomplete in your text editor.
+
 ```
 ---
 name: Print
@@ -30,6 +32,13 @@ arguments:
     errorMsg: foo is not a valid value for text. Expected format is quoted text.
     position: 1
 subcommands:
+  - name: reverse
+    description: reverses back what you type.
+    arguments:
+      - name: text
+        argtype: quoted text
+        description: text you want to print
+        errorMsg: foo is not a valid value for text. Expected format is quoted text.
   - name: quote
     description: helps you stand on the shoulders of giants by using words from histories most articulate people
     subcommands:
@@ -44,7 +53,7 @@ subcommands:
             errorMsg: Please provide a valid author name, try someone famous "
 ```
 
-#### Use slashParse to parse your arguments
+#### setup slashParse on load of your application
 
 ```
 package main
@@ -53,41 +62,64 @@ import com.gitlab.ericjaystevens.slashparse
 
 const pathToYaml = "path/to/yaml"
 
-ExecuteCommand(args string) (responce string, Error) {
+func (p *plugin) OnActivate() Error {
 
   //define the slash command
   slashDef, _ := ioutil.ReadFile(pathToYaml)
   slashCommand, _ = slashparse.NewSlashCommand(slashDef)
 	
-  //parse it to get a command string and a map with all your arguments and their values
-  //This should provie a helpfull error if a require argument is missing or the command is not valid
-  command, values, err := p.slashCommand.Parse(args.Command)
-	if err != nil {
-		text := "bad command see help"
-		return text, err
-	}
+  //Identify the method or functions to be called based on the command string
+  //The command string is the slash command without the slash or arguments.
+	p.slashCommand.SetHandler("Print", executePrint)
+	p.slashCommand.SetHandler("print reverse", executePrintReverse)
+	p.slashCommand.SetHandler("print quote author", executePrintQuoteAuthor)
+	p.slashCommand.SetHandler("print quote random", executePrintQuoteRandom)
 
-
-	switch command {
-	case "Print":
-		return executePrint(values["text"])
-	case "help":
-		markdownHelp := p.slashCommand.GetSlashHelp()
-		return markdownHelp, nil
-  case "quote random":
-    return executeQuoteRandom()
-  case "quote author":
-    return executeQuoteByAuthor(values["authorName"])
-	default:
-		text := "Unknown unknown"
-	}
-
-}
-
-func print(input string) string{
-	return input
+	return nil
 }
 ```
+
+#### Use slashparse to parse the incoming slash command 
+
+```
+func (p *Plugin) ExecuteCommand(command string) (string, error) {
+	msg, err := p.slashCommand.Execute(command)
+
+	if err != nil {
+		return "", error
+	}
+	return msg, nil
+}
+```
+
+#### For your slash command and each subcommand do the work in handlers, that will have access to parsed arguments
+
+use ```values[argumentName]``` to reference an argument's value, and you don't need to validate it exists if its required.
+
+```
+func executePrint(values map[string]string) (msg string, err error) {
+
+	msg = "you want my to say what? ...  " + values["text"]
+	return
+}
+```
+
+```
+func executePrintQuoteRandom(values map[string]string) (msg string, err error) {
+
+	msg = "print a random quote"
+	return
+}
+```
+
+```
+func executePrintQuoteAuthor(values map[string]string) (msg string, err error) {
+
+	msg = "Print a random quote from " + values["authorName"]
+	return
+}
+```
+
 
 ### What your users will see
 
@@ -103,8 +135,6 @@ will provide the expected output
 Hello World!
 ```
 
-Alternatively if they could use the flags you set instead of position
-
 #### Help
 
 If your user can access generated help by running your slash command and help. 
@@ -115,14 +145,7 @@ If your user can access generated help by running your slash command and help.
 
 Slash parse give nice help output. 
 
-```
-Print: "Prints the things you want"
-
-/print "text"
-
-  Text: -t,--tex
-    text you want to display
-```
+![markdown rendered help documentation](examples/images/helpScreenshot.PNG)
 
 
 #### Invalid commands
