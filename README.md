@@ -1,6 +1,6 @@
-[![Go Report Card](https://goreportcard.com/badge/github.com/ericjaystevens/slashparse)](https://goreportcard.com/report/github.com/ericjaystevens/slashparse)
 [![Actions Status](https://github.com/ericjaystevens/slashparse/workflows/Go/badge.svg)](https://github.com/ericjaystevens/slashparse/actions)
 [![Coverage Status](https://coveralls.io/repos/github/ericjaystevens/slashparse/badge.svg?branch=master)](https://coveralls.io/github/ericjaystevens/slashparse?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ericjaystevens/slashparse)](https://goreportcard.com/report/github.com/ericjaystevens/slashparse)
 
 # slashparse
 Go module for parsing slash commands
