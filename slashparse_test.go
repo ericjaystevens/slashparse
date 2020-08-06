@@ -22,6 +22,7 @@ func getSimpleDef() []byte {
 }
 
 var SimpleDef = getSimpleDef()
+var lotsOfArgsDef, _ = ioutil.ReadFile("./examples/helloWorld/lotsofargs.yaml")
 
 func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
@@ -359,12 +360,21 @@ func TestInvokeHandler(t *testing.T) {
 		})
 	}
 
+	t.Run("invoke without setting handler", func(t *testing.T) {
+		newSlash, _ := NewSlashCommand(SimpleDef)
+		commandString, values, _ := newSlash.Parse("/print reverse pick")
+		_, err := newSlash.invokeHandler(commandString, values)
+
+		assert.EqualError(t, err, "No handler set")
+	})
+
 }
 
 type executeTests struct {
 	name          string
 	commandString string
 	want          string
+	slashDef      []byte
 }
 
 func TestExecute(t *testing.T) {
@@ -374,22 +384,31 @@ func TestExecute(t *testing.T) {
 			name:          "slashCommand Test",
 			commandString: "/print echo",
 			want:          "print called with argument echo",
+			slashDef:      SimpleDef,
 		},
 		{
 			name:          "subcommand Test",
 			commandString: "/print reverse deep",
 			want:          "reverseHandler called with text set as deep",
+			slashDef:      SimpleDef,
 		},
 		{
 			name:          "sub sub command Test",
 			commandString: "/print quote author Shakespeare",
 			want:          "quoteAuthorHandler called with authorName set as Shakespeare",
+			slashDef:      SimpleDef,
+		},
+		{
+			name:          "missing required argument",
+			commandString: `/search "I once had a dream, it was a good dream to dream"`,
+			want:          "required fieled search is missing, see /search help for more details",
+			slashDef:      lotsOfArgsDef,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			newSlash, _ := NewSlashCommand(SimpleDef)
+			newSlash, _ := NewSlashCommand(test.slashDef)
 
 			newSlash.SetHandler("print quote author", func(args map[string]string) (string, error) {
 				return "quoteAuthorHandler called with authorName set as " + args["authorName"], nil

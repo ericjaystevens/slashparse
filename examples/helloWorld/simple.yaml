@@ -6,7 +6,7 @@ arguments:
     argtype: quoted text
     description: text you want to print
     errorMsg: foo is not a valid value for text. Expected format is quoted text.
-    position: 1
+    position: 0
 subcommands:
   - name: reverse
     description: reverses back what you type.

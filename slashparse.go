@@ -116,7 +116,10 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 
 func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
 	if strings.EqualFold(commandString, s.Name) {
-		return s.handler(args)
+		if s.handler != nil {
+			return s.handler(args)
+		}
+		return "", errors.New("No handler set")
 	}
 
 	subCommand, err := s.getSubCommand(commandString)
@@ -124,7 +127,10 @@ func (s *SlashCommand) invokeHandler(commandString string, args map[string]strin
 		return "", err
 	}
 
-	return subCommand.handler(args)
+	if subCommand.handler != nil {
+		return subCommand.handler(args)
+	}
+	return "", errors.New("No handler set")
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
@@ -179,8 +185,8 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 	if strings.EqualFold(command, s.Name) {
 		for _, slashArg := range s.Arguments {
 			position := slashArg.Position
-			if len(positionalArgs) >= position {
-				m[slashArg.Name] = positionalArgs[position-1]
+			if len(positionalArgs) > position {
+				m[slashArg.Name] = positionalArgs[position] //panics.
 			}
 		}
 
@@ -194,7 +200,7 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 
 	for _, slashArg := range subCommand.Arguments {
 		position := slashArg.Position
-		if len(positionalArgs) >= position {
+		if len(positionalArgs) > position {
 			m[slashArg.Name] = positionalArgs[position]
 		}
 
