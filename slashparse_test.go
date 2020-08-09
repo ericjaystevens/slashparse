@@ -38,7 +38,7 @@ func TestNewSlashCommand(t *testing.T) {
 						ArgType:     "quoted text",
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
-						Position:    1,
+						Position:    0,
 					},
 				},
 				SubCommands: []SubCommand{
@@ -106,7 +106,7 @@ func TestNewSlashCommand(t *testing.T) {
 						ArgType:     "quoted text",
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
-						Position:    1,
+						Position:    0,
 					},
 				},
 				SubCommands: []SubCommand{
@@ -401,7 +401,7 @@ func TestExecute(t *testing.T) {
 		{
 			name:          "missing required argument",
 			commandString: `/search "I once had a dream, it was a good dream to dream"`,
-			want:          "required fieled search is missing, see /search help for more details",
+			want:          "required field search is missing, see /search help for more details",
 			slashDef:      lotsOfArgsDef,
 		},
 	}

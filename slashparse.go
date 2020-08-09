@@ -4,6 +4,7 @@ package slashparse
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -34,7 +35,7 @@ type SlashCommand struct {
 	Name        string       `yaml:"name" json:"name,omitempty"`
 	Description string       `yaml:"description" json:"description"`
 	Arguments   []Argument   `yaml:"arguments" json:"arguments,omitempty"`
-	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
+	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands,omitempty"`
 	handler     func(map[string]string) (string, error)
 }
 
@@ -180,13 +181,17 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 	}
 
 	// need to go ordered here?
-	positionalArgs := GetPositionalArgs(args)
+	splitArgs := GetPositionalArgs(args)
 
 	if strings.EqualFold(command, s.Name) {
 		for _, slashArg := range s.Arguments {
 			position := slashArg.Position
-			if len(positionalArgs) > position {
-				m[slashArg.Name] = positionalArgs[position] //panics.
+			if len(splitArgs) > position {
+				m[slashArg.Name] = splitArgs[position] //panics.
+			} else {
+				if slashArg.Required {
+					return m, fmt.Errorf("required field %[1]s is missing, see /%[1]s help for more details", slashArg.Name)
+				}
 			}
 		}
 
@@ -200,8 +205,8 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 
 	for _, slashArg := range subCommand.Arguments {
 		position := slashArg.Position
-		if len(positionalArgs) > position {
-			m[slashArg.Name] = positionalArgs[position]
+		if len(splitArgs) > position {
+			m[slashArg.Name] = splitArgs[position]
 		}
 
 	}
@@ -264,7 +269,11 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 
 //Execute parses and runs the configured handler to process your command.
 func (s *SlashCommand) Execute(slashString string) (string, error) {
-	commandString, values, _ := s.Parse(slashString)
+	commandString, values, err := s.Parse(slashString)
+	if err != nil {
+		return err.Error(), err
+	}
+
 	msg, err := s.invokeHandler(commandString, values)
 	return msg, err
 }
