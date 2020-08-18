@@ -1,0 +1,28 @@
+---
+name: search
+description: Search text
+arguments:
+  - name: text
+    argtype: quoted text
+    description: text you want to have searched
+    errorMsg: Please proved a valid value for text. Expected format is quoted text.
+    position: 0
+    required: true
+  - name: search
+    argtype: text
+    description: what you want to search for
+    position: 1
+    required: true
+  - name: replace
+    argtype: text
+    description: repalce the found text with
+    position: 2
+    required: false
+  - name: allCaps
+    argType: switch
+    description: return changed items in all caps
+    position: 3
+  - name: numberOfSearches
+    argtype: number
+    description: number of occurances to search and replace for
+    position: 4

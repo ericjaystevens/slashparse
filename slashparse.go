@@ -4,6 +4,7 @@ package slashparse
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -34,7 +35,7 @@ type SlashCommand struct {
 	Name        string       `yaml:"name" json:"name,omitempty"`
 	Description string       `yaml:"description" json:"description"`
 	Arguments   []Argument   `yaml:"arguments" json:"arguments,omitempty"`
-	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands"`
+	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands,omitempty"`
 	handler     func(map[string]string) (string, error)
 }
 
@@ -46,6 +47,11 @@ type SubCommand struct {
 	SubCommands  []SubCommand `yaml:"subcommands" json:"subcommands"`
 	commandPaths []string
 	handler      func(map[string]string) (string, error)
+}
+
+//implimented by SlashCommand and SubCommand
+type command interface {
+	getArgsValues() (map[string]string, error)
 }
 
 //NewSlashCommand define a new slash command to parse
@@ -116,7 +122,10 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 
 func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
 	if strings.EqualFold(commandString, s.Name) {
-		return s.handler(args)
+		if s.handler != nil {
+			return s.handler(args)
+		}
+		return "", errors.New("No handler set")
 	}
 
 	subCommand, err := s.getSubCommand(commandString)
@@ -124,7 +133,10 @@ func (s *SlashCommand) invokeHandler(commandString string, args map[string]strin
 		return "", err
 	}
 
-	return subCommand.handler(args)
+	if subCommand.handler != nil {
+		return subCommand.handler(args)
+	}
+	return "", errors.New("No handler set")
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
@@ -167,24 +179,8 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 		return m, err //command not included in string?
 	}
 
-	args := strings.TrimSpace(CommandAndArgs[loc[1]:])
-
-	if len(args) == 0 {
-		return m, nil
-	}
-
-	// need to go ordered here?
-	positionalArgs := GetPositionalArgs(args)
-
 	if strings.EqualFold(command, s.Name) {
-		for _, slashArg := range s.Arguments {
-			position := slashArg.Position
-			if len(positionalArgs) >= position {
-				m[slashArg.Name] = positionalArgs[position-1]
-			}
-		}
-
-		return m, nil
+		return getArgsValues(CommandAndArgs[loc[1]:], s.Arguments, s.Name)
 	}
 
 	subCommand, err := s.getSubCommand(command)
@@ -192,15 +188,45 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 		return m, err
 	}
 
-	for _, slashArg := range subCommand.Arguments {
-		position := slashArg.Position
-		if len(positionalArgs) >= position {
-			m[slashArg.Name] = positionalArgs[position]
-		}
+	return getArgsValues(CommandAndArgs[loc[1]:], subCommand.Arguments, s.Name)
 
+}
+
+func getArgsValues(argString string, commandArgs []Argument, slashCommandName string) (m map[string]string, err error) {
+
+	m = make(map[string]string)
+	missingArgs := make([]string, 0, 8)
+	splitArgs := GetPositionalArgs(argString)
+
+	for _, commandArg := range commandArgs {
+		position := commandArg.Position
+		if len(splitArgs) > position {
+			m[commandArg.Name] = splitArgs[position]
+		} else {
+			if commandArg.Required {
+				missingArgs = append(missingArgs, commandArg.Name)
+			}
+		}
 	}
 
+	if len(missingArgs) > 0 {
+		return m, getMissingArgError(missingArgs, slashCommandName)
+	}
 	return m, nil
+}
+
+func getMissingArgError(missingArgs []string, commandName string) error {
+
+	commandName = strings.ToLower(commandName)
+	if len(missingArgs) > 2 {
+		return fmt.Errorf("required fields %s, and %s are missing, see /%s help for more details", strings.Join(missingArgs[:len(missingArgs)-1], ", "), missingArgs[len(missingArgs)-1], commandName)
+	}
+	if len(missingArgs) > 1 {
+		return fmt.Errorf("required fields %s and %s are missing, see /%s help for more details", missingArgs[0], missingArgs[1], commandName)
+
+	}
+	return fmt.Errorf("required field %v is missing, see /%s help for more details", missingArgs[0], commandName)
+
 }
 
 //getCommandString gets and validated the command portion of a command and argument string
@@ -258,7 +284,11 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 
 //Execute parses and runs the configured handler to process your command.
 func (s *SlashCommand) Execute(slashString string) (string, error) {
-	commandString, values, _ := s.Parse(slashString)
+	commandString, values, err := s.Parse(slashString)
+	if err != nil {
+		return err.Error(), err
+	}
+
 	msg, err := s.invokeHandler(commandString, values)
 	return msg, err
 }
