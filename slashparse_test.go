@@ -52,6 +52,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Description: "text you want to print",
 								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 								Position:    0,
+								Required:    true,
 							},
 						},
 						commandPaths: []string{"Print reverse"},
@@ -120,6 +121,7 @@ func TestNewSlashCommand(t *testing.T) {
 								Description: "text you want to print",
 								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 								Position:    0,
+								Required:    true,
 							},
 						},
 						commandPaths: []string{"Print reverse"},
@@ -241,14 +243,43 @@ func TestGetPositionalArgs(t *testing.T) {
 	assert.Equal(t, want, got)
 }
 
+type getValuesTests struct {
+	testName       string
+	commandAndArgs string
+	slashDef       []byte
+	want           map[string]string
+}
+
 func TestGetValues(t *testing.T) {
+	tests := []getValuesTests{
+		{
+			testName:       "Slash command single arg",
+			commandAndArgs: "/print foo",
+			slashDef:       SimpleDef,
+			want:           map[string]string{"text": "foo"},
+		},
+		{
+			testName:       "Slash sub command single arg",
+			commandAndArgs: "/print reverse foo",
+			slashDef:       SimpleDef,
+			want:           map[string]string{"text": "foo"},
+		},
+		{
+			testName:       "Slash sub sub command single arg",
+			commandAndArgs: "/print quote author foo",
+			slashDef:       SimpleDef,
+			want:           map[string]string{"authorName": "foo"},
+		},
+	}
 
-	commandAndArgs := "/print foo"
-	newSlash, _ := NewSlashCommand(SimpleDef)
-	got, _ := newSlash.getValues(commandAndArgs)
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			newSlash, _ := NewSlashCommand(test.slashDef)
+			got, _ := newSlash.getValues(test.commandAndArgs)
 
-	want := map[string]string{"text": "foo"}
-	assert.Equal(t, want, got)
+			assert.Equal(t, test.want, got)
+		})
+	}
 }
 
 func TestParse(t *testing.T) {
@@ -403,6 +434,18 @@ func TestExecute(t *testing.T) {
 			commandString: `/search "I once had a dream, it was a good dream to dream"`,
 			want:          "required field search is missing, see /search help for more details",
 			slashDef:      lotsOfArgsDef,
+		},
+		{
+			name:          "multiple missing required arguments",
+			commandString: `/search`,
+			want:          "required fields text and search are missing, see /search help for more details",
+			slashDef:      lotsOfArgsDef,
+		},
+		{
+			name:          "missing required argument in sub command",
+			commandString: `/print reverse`,
+			want:          "required field text is missing, see /print help for more details",
+			slashDef:      SimpleDef,
 		},
 	}
 

@@ -1,5 +1,5 @@
 ---
-name: Search
+name: search
 description: Search text
 arguments:
   - name: text

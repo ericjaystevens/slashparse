@@ -49,6 +49,11 @@ type SubCommand struct {
 	handler      func(map[string]string) (string, error)
 }
 
+//implimented by SlashCommand and SubCommand
+type command interface {
+	getArgsValues() (map[string]string, error)
+}
+
 //NewSlashCommand define a new slash command to parse
 func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 	unmarshalErr := yaml.Unmarshal([]byte(slashDef), &s)
@@ -174,28 +179,8 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 		return m, err //command not included in string?
 	}
 
-	args := strings.TrimSpace(CommandAndArgs[loc[1]:])
-
-	if len(args) == 0 {
-		return m, nil
-	}
-
-	// need to go ordered here?
-	splitArgs := GetPositionalArgs(args)
-
 	if strings.EqualFold(command, s.Name) {
-		for _, slashArg := range s.Arguments {
-			position := slashArg.Position
-			if len(splitArgs) > position {
-				m[slashArg.Name] = splitArgs[position] //panics.
-			} else {
-				if slashArg.Required {
-					return m, fmt.Errorf("required field %[1]s is missing, see /%[1]s help for more details", slashArg.Name)
-				}
-			}
-		}
-
-		return m, nil
+		return getArgsValues(CommandAndArgs[loc[1]:], s.Arguments, s.Name)
 	}
 
 	subCommand, err := s.getSubCommand(command)
@@ -203,15 +188,45 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 		return m, err
 	}
 
-	for _, slashArg := range subCommand.Arguments {
-		position := slashArg.Position
-		if len(splitArgs) > position {
-			m[slashArg.Name] = splitArgs[position]
-		}
+	return getArgsValues(CommandAndArgs[loc[1]:], subCommand.Arguments, s.Name)
 
+}
+
+func getArgsValues(argString string, commandArgs []Argument, slashCommandName string) (m map[string]string, err error) {
+
+	m = make(map[string]string)
+	missingArgs := make([]string, 0, 8)
+	splitArgs := GetPositionalArgs(argString)
+
+	for _, commandArg := range commandArgs {
+		position := commandArg.Position
+		if len(splitArgs) > position {
+			m[commandArg.Name] = splitArgs[position]
+		} else {
+			if commandArg.Required {
+				missingArgs = append(missingArgs, commandArg.Name)
+			}
+		}
 	}
 
+	if len(missingArgs) > 0 {
+		return m, getMissingArgError(missingArgs, slashCommandName)
+	}
 	return m, nil
+}
+
+func getMissingArgError(missingArgs []string, commandName string) error {
+
+	commandName = strings.ToLower(commandName)
+	if len(missingArgs) > 2 {
+		return fmt.Errorf("required fields %s, and %s are missing, see /%s help for more details", strings.Join(missingArgs[:len(missingArgs)-1], ", "), missingArgs[len(missingArgs)-1], commandName)
+	}
+	if len(missingArgs) > 1 {
+		return fmt.Errorf("required fields %s and %s are missing, see /%s help for more details", missingArgs[0], missingArgs[1], commandName)
+
+	}
+	return fmt.Errorf("required field %v is missing, see /%s help for more details", missingArgs[0], commandName)
+
 }
 
 //getCommandString gets and validated the command portion of a command and argument string

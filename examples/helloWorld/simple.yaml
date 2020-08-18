@@ -15,6 +15,7 @@ subcommands:
         argtype: quoted text
         description: text you want to print
         errorMsg: foo is not a valid value for text. Expected format is quoted text.
+        required: true
   - name: quote
     description: helps you stand on the shoulders of giants by using words from histories most articulate people
     subcommands:
