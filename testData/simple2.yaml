@@ -12,7 +12,7 @@ subcommands:
     description: reverses back what you type.
     arguments:
       - name: text
-        argtype: quoted text
+        argtype: remaining text
         description: text you want to print
         errorMsg: foo is not a valid value for text. Expected format is quoted text.
   - name: quote

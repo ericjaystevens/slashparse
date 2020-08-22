@@ -23,6 +23,7 @@ func getSimpleDef() []byte {
 
 var SimpleDef = getSimpleDef()
 var lotsOfArgsDef, _ = ioutil.ReadFile("./examples/helloWorld/lotsofargs.yaml")
+var simpleDef2, _ = ioutil.ReadFile("./testData/simple2.yaml")
 
 func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
@@ -496,4 +497,15 @@ func TestGetSlashHelp(t *testing.T) {
 	//just test the first line, to avoid so this doesn't have to be maintained while features are changeing so rapidly
 	firstLine := strings.Split(got, "\n")[0]
 	assert.Equal(t, firstLine, "#### /Print Help")
+}
+
+func TestArgumentTypes(t *testing.T) {
+
+	newSlash, _ := NewSlashCommand(simpleDef2)
+	commandString := "/print reverse bunch of wisdom"
+
+	got, _ := newSlash.getValues(commandString)
+	want := "bunch of wisdom"
+
+	assert.Equal(t, want, got["text"])
 }
