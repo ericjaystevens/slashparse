@@ -24,6 +24,7 @@ func getSimpleDef() []byte {
 var SimpleDef = getSimpleDef()
 var lotsOfArgsDef, _ = ioutil.ReadFile("./examples/helloWorld/lotsofargs.yaml")
 var simpleDef2, _ = ioutil.ReadFile("./testData/simple2.yaml")
+var doroDef, _ = ioutil.ReadFile("./testData/doro.yaml")
 
 func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
@@ -499,13 +500,40 @@ func TestGetSlashHelp(t *testing.T) {
 	assert.Equal(t, firstLine, "#### /Print Help")
 }
 
+type argumentTypesTests struct {
+	name          string
+	commandString string
+	want          string
+	argName       string
+	slashDef      []byte
+}
+
 func TestArgumentTypes(t *testing.T) {
 
-	newSlash, _ := NewSlashCommand(simpleDef2)
-	commandString := "/print reverse bunch of wisdom"
+	tests := []argumentTypesTests{
+		{
+			name:          "single arg remaining text",
+			commandString: "/print reverse bunch of wisdom",
+			argName:       "text",
+			want:          "bunch of wisdom",
+			slashDef:      simpleDef2,
+		},
+		{
+			name:          "text arg then remaining text arg",
+			commandString: "/doro start 45 getting after it",
+			argName:       "log",
+			want:          "getting after it",
+			slashDef:      doroDef,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 
-	got, _ := newSlash.getValues(commandString)
-	want := "bunch of wisdom"
+			newSlash, _ := NewSlashCommand(test.slashDef)
+			got, _ := newSlash.getValues(test.commandString)
 
-	assert.Equal(t, want, got["text"])
+			assert.Equal(t, test.want, got[test.argName])
+		})
+
+	}
 }
