@@ -201,7 +201,12 @@ func getArgsValues(argString string, commandArgs []Argument, slashCommandName st
 	for _, commandArg := range commandArgs {
 		position := commandArg.Position
 		if len(splitArgs) > position {
-			m[commandArg.Name] = splitArgs[position]
+			switch commandArg.ArgType {
+			case "text", "quoted text":
+				m[commandArg.Name] = splitArgs[position]
+			case "remaining text":
+				m[commandArg.Name] = strings.Join(splitArgs[position:], " ")
+			}
 		} else {
 			if commandArg.Required {
 				missingArgs = append(missingArgs, commandArg.Name)

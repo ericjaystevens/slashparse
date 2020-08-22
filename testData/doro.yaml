@@ -1,0 +1,18 @@
+---
+name: doro
+description: Echos back what you type.
+subcommands:
+  - name: start
+    description: start a pomodoro work session
+    arguments:
+      - name: time
+        argtype: text
+        description: how long your session should last
+        required: false
+        default: 25
+        position: 0
+      - name: log
+        argtype: remaining text
+        description: Actionable description of what you will be working on
+        required: false
+        position: 1
