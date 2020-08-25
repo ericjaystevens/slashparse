@@ -449,6 +449,12 @@ func TestExecute(t *testing.T) {
 			want:          "required field text is missing, see /print help for more details",
 			slashDef:      SimpleDef,
 		},
+		{
+			name:          "missing 3 required args",
+			commandString: `/print reverse`,
+			want:          "required field text is missing, see /print help for more details",
+			slashDef:      SimpleDef,
+		},
 	}
 
 	for _, test := range tests {
