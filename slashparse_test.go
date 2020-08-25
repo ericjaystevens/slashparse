@@ -278,6 +278,12 @@ func TestGetValues(t *testing.T) {
 			slashDef:       SimpleDef,
 			want:           map[string]string{"text": "foo"},
 		},
+		{
+			testName:       "positional followed by named arguments",
+			commandAndArgs: `/search "moon river" --search river --replace rising`,
+			slashDef:       lotsOfArgsDef,
+			want:           map[string]string{"text": "moon river", "search": "river", "replace": "rising"},
+		},
 	}
 
 	for _, test := range tests {

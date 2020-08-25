@@ -200,6 +200,7 @@ func getNamedArgValues(argString string) (m map[string]string) {
 	for _, splitArg := range splitArgs {
 		if argumentName != "" {
 			m[argumentName] = splitArg
+			argumentName = ""
 		}
 		if strings.HasPrefix(splitArg, "--") {
 			argumentName = splitArg[2:]
