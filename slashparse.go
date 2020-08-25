@@ -192,6 +192,23 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 
 }
 
+func getNamedArgValues(argString string) (m map[string]string) {
+	m = make(map[string]string)
+
+	splitArgs := GetPositionalArgs(argString)
+	var argumentName string
+	for _, splitArg := range splitArgs {
+		if argumentName != "" {
+			m[argumentName] = splitArg
+		}
+		if strings.HasPrefix(splitArg, "--") {
+			argumentName = splitArg[2:]
+		}
+	}
+
+	return m
+}
+
 func getArgsValues(argString string, commandArgs []Argument, slashCommandName string) (m map[string]string, err error) {
 
 	m = make(map[string]string)
@@ -201,6 +218,9 @@ func getArgsValues(argString string, commandArgs []Argument, slashCommandName st
 	for _, commandArg := range commandArgs {
 		position := commandArg.Position
 		if len(splitArgs) > position {
+			if strings.HasPrefix(splitArgs[position], "-") {
+				break
+			}
 			switch commandArg.ArgType {
 			case "text", "quoted text":
 				m[commandArg.Name] = splitArgs[position]
@@ -210,6 +230,19 @@ func getArgsValues(argString string, commandArgs []Argument, slashCommandName st
 		} else {
 			if commandArg.Required {
 				missingArgs = append(missingArgs, commandArg.Name)
+			}
+		}
+	}
+
+	namedMap := getNamedArgValues(argString)
+
+	for k, v := range namedMap {
+		m[k] = v
+		for i, missingArg := range missingArgs {
+			if missingArg == v {
+				missingArgs[i] = missingArgs[len(missingArgs)-1]
+				missingArgs[len(missingArgs)-1] = ""
+				missingArg = missingArg[:len(missingArg)-1]
 			}
 		}
 	}

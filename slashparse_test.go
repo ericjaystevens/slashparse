@@ -272,6 +272,12 @@ func TestGetValues(t *testing.T) {
 			slashDef:       SimpleDef,
 			want:           map[string]string{"authorName": "foo"},
 		},
+		{
+			testName:       "slash command single named argument",
+			commandAndArgs: "/print --text foo",
+			slashDef:       SimpleDef,
+			want:           map[string]string{"text": "foo"},
+		},
 	}
 
 	for _, test := range tests {
