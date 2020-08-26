@@ -28,6 +28,7 @@ type Argument struct {
 	ErrorMsg    string `yaml:"errorMsg" json:"errorMsg"`
 	Position    int    `yaml:"position" json:"position"`
 	Required    bool   `yaml:"required" json:"required"`
+	ShortName   string `yaml:"shortName" json:"shortName"`
 }
 
 //SlashCommand defines the structure of a slash command string
@@ -180,7 +181,7 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 	}
 
 	if strings.EqualFold(command, s.Name) {
-		return getArgsValues(CommandAndArgs[loc[1]:], s.Arguments, s.Name)
+		return s.getArgsValues(command, CommandAndArgs[loc[1]:], s.Arguments, s.Name)
 	}
 
 	subCommand, err := s.getSubCommand(command)
@@ -188,11 +189,11 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 		return m, err
 	}
 
-	return getArgsValues(CommandAndArgs[loc[1]:], subCommand.Arguments, s.Name)
+	return s.getArgsValues(command, CommandAndArgs[loc[1]:], subCommand.Arguments, s.Name)
 
 }
 
-func getNamedArgValues(argString string) (m map[string]string) {
+func (s *SlashCommand) getNamedArgValues(commandString, argString string) (m map[string]string) {
 	m = make(map[string]string)
 
 	splitArgs := GetPositionalArgs(argString)
@@ -204,13 +205,38 @@ func getNamedArgValues(argString string) (m map[string]string) {
 		}
 		if strings.HasPrefix(splitArg, "--") {
 			argumentName = splitArg[2:]
+		} else if strings.HasPrefix(splitArg, "-") {
+			argument, _ := s.getArgumentFromShortName(commandString, splitArg[1:])
+			argumentName = argument.Name
 		}
 	}
 
 	return m
 }
 
-func getArgsValues(argString string, commandArgs []Argument, slashCommandName string) (m map[string]string, err error) {
+// getArgumentFromShortName returns an argument that matches the shortname
+func (s *SlashCommand) getArgumentFromShortName(commandString string, shortName string) (argument Argument, err error) {
+	if strings.EqualFold(commandString, s.Name) {
+		for _, arg := range s.Arguments {
+			if arg.ShortName == shortName {
+				return arg, nil
+			}
+		}
+		return argument, fmt.Errorf("Unknown paramater '%s', see /%s help for more details", shortName, commandString)
+	}
+
+	subCommand, _ := s.getSubCommand(commandString)
+
+	for _, arg := range subCommand.Arguments {
+		if arg.ShortName == shortName {
+			return arg, nil
+		}
+	}
+
+	return argument, fmt.Errorf("Unknown paramater '%s', see /%s help for more details", shortName, commandString)
+}
+
+func (s *SlashCommand) getArgsValues(commandString string, argString string, commandArgs []Argument, slashCommandName string) (m map[string]string, err error) {
 
 	m = make(map[string]string)
 	missingArgs := make([]string, 0, 8)
@@ -235,7 +261,7 @@ func getArgsValues(argString string, commandArgs []Argument, slashCommandName st
 		}
 	}
 
-	namedMap := getNamedArgValues(argString)
+	namedMap := s.getNamedArgValues(commandString, argString)
 
 	for k, v := range namedMap {
 		m[k] = v

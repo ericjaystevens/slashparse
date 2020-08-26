@@ -41,6 +41,7 @@ func TestNewSlashCommand(t *testing.T) {
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 						Position:    0,
+						ShortName:   "t",
 					},
 				},
 				SubCommands: []SubCommand{
@@ -55,6 +56,7 @@ func TestNewSlashCommand(t *testing.T) {
 								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 								Position:    0,
 								Required:    true,
+								ShortName:   "t",
 							},
 						},
 						commandPaths: []string{"Print reverse"},
@@ -110,6 +112,7 @@ func TestNewSlashCommand(t *testing.T) {
 						Description: "text you want to print",
 						ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 						Position:    0,
+						ShortName:   "t",
 					},
 				},
 				SubCommands: []SubCommand{
@@ -124,6 +127,7 @@ func TestNewSlashCommand(t *testing.T) {
 								ErrorMsg:    "foo is not a valid value for text. Expected format is quoted text.",
 								Position:    0,
 								Required:    true,
+								ShortName:   "t",
 							},
 						},
 						commandPaths: []string{"Print reverse"},
@@ -283,6 +287,18 @@ func TestGetValues(t *testing.T) {
 			commandAndArgs: `/search "moon river" --search river --replace rising`,
 			slashDef:       lotsOfArgsDef,
 			want:           map[string]string{"text": "moon river", "search": "river", "replace": "rising"},
+		},
+		{
+			testName:       "slash command single short named paramater",
+			commandAndArgs: `/print -t foo`,
+			slashDef:       SimpleDef,
+			want:           map[string]string{"text": "foo"},
+		},
+		{
+			testName:       "slash sub command single short named paramater",
+			commandAndArgs: `/print reverse -t foo`,
+			slashDef:       SimpleDef,
+			want:           map[string]string{"text": "foo"},
 		},
 	}
 
