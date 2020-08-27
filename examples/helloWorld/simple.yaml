@@ -7,6 +7,7 @@ arguments:
     description: text you want to print
     errorMsg: foo is not a valid value for text. Expected format is quoted text.
     position: 0
+    shortName: t
 subcommands:
   - name: reverse
     description: reverses back what you type.
@@ -16,6 +17,7 @@ subcommands:
         description: text you want to print
         errorMsg: foo is not a valid value for text. Expected format is quoted text.
         required: true
+        shortName: t
   - name: quote
     description: helps you stand on the shoulders of giants by using words from histories most articulate people
     subcommands:
