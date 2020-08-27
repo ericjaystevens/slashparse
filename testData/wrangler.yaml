@@ -1,0 +1,90 @@
+---
+name: wrangler
+description: Manage Mattermost Messages Masterfully
+subcommands:
+  - name: info
+    description: Shows plugin information
+  - name: move 
+    description: Move a message
+    subcommands:
+      - name: thread
+        description: "Move a message and the thread it belongs to"
+        arguments:
+          - name: messageID
+            description: The ID of the message to be moved
+            argtype: text
+            requred: true
+            shortname: m
+            position: 0
+          - name: channelID
+            description: The ID of the channel where the message will be moved to
+            argtype: text
+            requred: true
+            shortname: c
+            position: 1
+  - name: copy
+    description: Copy messages
+    subcommands:
+      - name: thread
+        description:  Copy a message and the thread it belongs to
+        arguments:
+          - name: messageID
+            description: The ID of the message to be coppied
+            argtype: text
+            requred: true
+            shortname: m
+            position: 0
+          - name: channelID
+            description: The ID of the channel where the message will be copied to
+            argtype: text
+            requred: true
+            shortname: c
+            position: 1
+  - name: attach
+    description: Attach messages
+    subcommands:
+      - name: message
+        description: Attach messages
+        arguments:
+          - name: messageID
+            description: The ID of the message to be attached
+            argtype: text
+            requred: true
+            shortname: m
+            position: 0
+          - name: RootMessageID
+            description: The root message ID of the thread
+            argtype: text
+            requred: true
+            shortname: r
+            position: 1
+  - name: list
+    description: Lists IDs for channels and messages
+    subcommands:
+      - name: channels
+        description: List channel IDs that you have joined
+        arguments:
+          - name: channel-filter
+            description: A filter value that channel names must contain to be shown on the list
+            argtype: switch
+            shortName: c
+            position: 0
+          - name: team-filter
+            description: A filter value that team names must contain to be shown on the list
+            argtype: switch
+            shortName: t
+            position: 1
+      - name: messages
+        description: Shows detailed help information
+        arguments:
+          - name: count
+            description: Number of messages to return. Must be between 1 and 100 (default 20)
+            argType: number
+            default: 20
+            shortname: c
+            position: 0
+          - name: trim-length
+            description: he max character count of messages listed before they are trimmed. Must be between 10 and 500 (default 50)
+            default: 50
+            shortName: t
+            position: 1
