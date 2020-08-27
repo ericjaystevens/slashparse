@@ -8,16 +8,19 @@ arguments:
     errorMsg: Please proved a valid value for text. Expected format is quoted text.
     position: 0
     required: true
+    shortName: t
   - name: search
     argtype: text
     description: what you want to search for
     position: 1
     required: true
+    shortName: s
   - name: replace
     argtype: text
     description: repalce the found text with
     position: 2
     required: false
+    shortName: r
   - name: allCaps
     argType: switch
     description: return changed items in all caps

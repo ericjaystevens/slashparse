@@ -300,6 +300,12 @@ func TestGetValues(t *testing.T) {
 			slashDef:       SimpleDef,
 			want:           map[string]string{"text": "foo"},
 		},
+		{
+			testName:       "mixed short and long named paramater",
+			commandAndArgs: `/search -t "this land is your land" --search land -r hand`,
+			slashDef:       lotsOfArgsDef,
+			want:           map[string]string{"text": "this land is your land", "search": "land", "replace": "hand"},
+		},
 	}
 
 	for _, test := range tests {
