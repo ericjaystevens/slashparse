@@ -24,6 +24,7 @@ const (
 type Argument struct {
 	Name        string `yaml:"name" json:"name"`
 	ArgType     string `yaml:"argtype" json:"argtype"`
+	Default     string `yaml: "default" json: "default"`
 	Description string `yaml:"description" json:"description"`
 	ErrorMsg    string `yaml:"errorMsg" json:"errorMsg"`
 	Position    int    `yaml:"position" json:"position"`
@@ -243,13 +244,17 @@ func (s *SlashCommand) getArgsValues(commandString string, argString string, com
 	splitArgs := GetPositionalArgs(argString)
 
 	for _, commandArg := range commandArgs {
+		if commandArg.Default != "" {
+			m[commandArg.Name] = commandArg.Default
+		}
+
 		position := commandArg.Position
 		if len(splitArgs) > position {
 			if strings.HasPrefix(splitArgs[position], "-") {
 				break
 			}
 			switch commandArg.ArgType {
-			case "text", "quoted text":
+			case "text", "quoted text", "number":
 				m[commandArg.Name] = splitArgs[position]
 			case "remaining text":
 				m[commandArg.Name] = strings.Join(splitArgs[position:], " ")

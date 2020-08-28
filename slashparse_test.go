@@ -25,6 +25,7 @@ var SimpleDef = getSimpleDef()
 var lotsOfArgsDef, _ = ioutil.ReadFile("./examples/helloWorld/lotsofargs.yaml")
 var simpleDef2, _ = ioutil.ReadFile("./testData/simple2.yaml")
 var doroDef, _ = ioutil.ReadFile("./testData/doro.yaml")
+var wranglerDef, _ = ioutil.ReadFile("./testData/wrangler.yaml")
 
 func TestNewSlashCommand(t *testing.T) {
 	tests := []newSlashCommandTests{
@@ -306,11 +307,32 @@ func TestGetValues(t *testing.T) {
 			slashDef:       lotsOfArgsDef,
 			want:           map[string]string{"text": "this land is your land", "search": "land", "replace": "hand"},
 		},
+		{
+			testName:       "wrangler list channels",
+			commandAndArgs: `/wrangler list channels --channel-filter foo`,
+			slashDef:       wranglerDef,
+			want:           map[string]string{"channel-filter": "foo"},
+		},
+		{
+			testName:       "wrangler list messages",
+			commandAndArgs: `/wrangler list messages --count 10 --trim-length 11`,
+			slashDef:       wranglerDef,
+			want:           map[string]string{"count": "10", "trim-length": "11"},
+		},
+		{
+			testName:       "wrangler list messages with defaults",
+			commandAndArgs: `/wrangler list messages`,
+			slashDef:       wranglerDef,
+			want:           map[string]string{"count": "20", "trim-length": "50"},
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.testName, func(t *testing.T) {
-			newSlash, _ := NewSlashCommand(test.slashDef)
+			newSlash, err := NewSlashCommand(test.slashDef)
+			if err != nil {
+				assert.Fail(t, "slash command not processed")
+			}
 			got, _ := newSlash.getValues(test.commandAndArgs)
 
 			assert.Equal(t, test.want, got)
