@@ -66,12 +66,12 @@ subcommands:
         arguments:
           - name: channel-filter
             description: A filter value that channel names must contain to be shown on the list
-            argtype: switch
+            argtype: text
             shortName: c
             position: 0
           - name: team-filter
             description: A filter value that team names must contain to be shown on the list
-            argtype: switch
+            argtype: text
             shortName: t
             position: 1
       - name: messages
@@ -84,6 +84,7 @@ subcommands:
             shortname: c
             position: 0
           - name: trim-length
+            argType: number
             description: he max character count of messages listed before they are trimmed. Must be between 10 and 500 (default 50)
             default: 50
             shortName: t
