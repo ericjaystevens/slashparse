@@ -1,6 +1,7 @@
 package slashparse
 
 import (
+	"errors"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -340,17 +341,59 @@ func TestGetValues(t *testing.T) {
 	}
 }
 
+type testParseTest struct {
+	testName          string
+	commandString     string
+	slashDef          []byte
+	wantCommandString string
+	wantValues        map[string]string
+	wantError         error
+}
+
 func TestParse(t *testing.T) {
-	slashCommandString := "/print foo"
 
-	wantCommands := "Print"
-	wantValues := map[string]string{"text": "foo"}
+	tests := []testParseTest{
+		{
+			testName:          "simple test",
+			commandString:     "/print foo",
+			slashDef:          SimpleDef,
+			wantCommandString: "Print",
+			wantValues:        map[string]string{"text": "foo"},
+		},
+		{
+			testName:          "valid wrangler command",
+			commandString:     "/wrangler list channels",
+			slashDef:          wranglerDef,
+			wantCommandString: "wrangler list channels",
+			wantValues:        map[string]string{},
+		},
+		{
+			testName:      "missing required subsubcommand",
+			commandString: "/wrangler list",
+			slashDef:      wranglerDef,
+			wantError:     errors.New("/wrangler list is not a valid command. Please see /wrangler help"),
+		},
+		{
+			testName:      "missing required subcommand",
+			commandString: "/wrangler",
+			slashDef:      wranglerDef,
+			wantError:     errors.New("/wrangler is not a valid command. Please see /wrangler help"),
+		},
+	}
 
-	newSlash, _ := NewSlashCommand(SimpleDef)
-	gotCommands, gotValues, _ := newSlash.Parse(slashCommandString)
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
 
-	assert.Equal(t, gotCommands, wantCommands)
-	assert.Equal(t, gotValues, wantValues)
+			newSlash, _ := NewSlashCommand(test.slashDef)
+			gotCommands, gotValues, gotErr := newSlash.Parse(test.commandString)
+
+			assert.Equal(t, test.wantCommandString, gotCommands)
+			assert.Equal(t, test.wantValues, gotValues)
+			if test.wantError != nil {
+				assert.EqualError(t, gotErr, test.wantError.Error())
+			}
+		})
+	}
 }
 
 //TODO: move simple2 to a test data folder, create more test yaml some that should validate and some that shouldn't
