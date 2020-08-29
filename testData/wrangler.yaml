@@ -1,11 +1,13 @@
 ---
 name: wrangler
 description: Manage Mattermost Messages Masterfully
+subCommandRequired: true
 subcommands:
   - name: info
     description: Shows plugin information
   - name: move 
     description: Move a message
+    subCommandRequired: true
     subcommands:
       - name: thread
         description: "Move a message and the thread it belongs to"
@@ -24,6 +26,7 @@ subcommands:
             position: 1
   - name: copy
     description: Copy messages
+    subCommandRequired: true
     subcommands:
       - name: thread
         description:  Copy a message and the thread it belongs to
@@ -42,6 +45,7 @@ subcommands:
             position: 1
   - name: attach
     description: Attach messages
+    subCommandRequired: true
     subcommands:
       - name: message
         description: Attach messages
@@ -60,6 +64,7 @@ subcommands:
             position: 1
   - name: list
     description: Lists IDs for channels and messages
+    subCommandRequired: true
     subcommands:
       - name: channels
         description: List channel IDs that you have joined

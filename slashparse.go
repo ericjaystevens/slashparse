@@ -24,7 +24,7 @@ const (
 type Argument struct {
 	Name        string `yaml:"name" json:"name"`
 	ArgType     string `yaml:"argtype" json:"argtype"`
-	Default     string `yaml: "default" json: "default"`
+	Default     string `yaml:"default" json:"default"`
 	Description string `yaml:"description" json:"description"`
 	ErrorMsg    string `yaml:"errorMsg" json:"errorMsg"`
 	Position    int    `yaml:"position" json:"position"`
@@ -34,21 +34,23 @@ type Argument struct {
 
 //SlashCommand defines the structure of a slash command string
 type SlashCommand struct {
-	Name        string       `yaml:"name" json:"name,omitempty"`
-	Description string       `yaml:"description" json:"description"`
-	Arguments   []Argument   `yaml:"arguments" json:"arguments,omitempty"`
-	SubCommands []SubCommand `yaml:"subcommands" json:"subcommands,omitempty"`
-	handler     func(map[string]string) (string, error)
+	Name               string       `yaml:"name" json:"name,omitempty"`
+	Description        string       `yaml:"description" json:"description"`
+	Arguments          []Argument   `yaml:"arguments" json:"arguments,omitempty"`
+	SubCommands        []SubCommand `yaml:"subcommands" json:"subcommands,omitempty"`
+	handler            func(map[string]string) (string, error)
+	SubCommandRequired bool `yaml:"subCommandRequired" json:"subCommandRequired"`
 }
 
 //SubCommand defines a command that proceeded the slash command
 type SubCommand struct {
-	Name         string       `yaml:"name" json:"name"`
-	Description  string       `yaml:"description" json:"description"`
-	Arguments    []Argument   `yaml:"arguments" json:"arguments"`
-	SubCommands  []SubCommand `yaml:"subcommands" json:"subcommands"`
-	commandPaths []string
-	handler      func(map[string]string) (string, error)
+	Name               string       `yaml:"name" json:"name"`
+	Description        string       `yaml:"description" json:"description"`
+	Arguments          []Argument   `yaml:"arguments" json:"arguments"`
+	SubCommands        []SubCommand `yaml:"subcommands" json:"subcommands"`
+	commandPaths       []string
+	handler            func(map[string]string) (string, error)
+	SubCommandRequired bool `yaml:"subCommandRequired" json:"subCommandRequired"`
 }
 
 //implimented by SlashCommand and SubCommand
@@ -310,7 +312,7 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 	command := strings.Replace(argsSplit[0], "/", "", 1)
 	args = strings.Replace(args, "/", "", 1)
 
-	//check each subcommand
+	//check sub subcommand
 	for _, subCommand := range s.SubCommands {
 		for _, subSubCommand := range subCommand.SubCommands {
 			subCommandString := s.Name + " " + subCommand.Name + " " + subSubCommand.Name
@@ -321,20 +323,26 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 			}
 		}
 
-		//check each sub sub command
+		//check each subcommand
 		subCommandString := s.Name + " " + subCommand.Name
 		if len(args) >= len(subCommandString) {
 			if strings.EqualFold(args[:len(subCommandString)], subCommandString) {
+				if subCommand.SubCommandRequired {
+					return "", fmt.Errorf("/%s is not a valid command. Please see /%s help", subCommandString, s.Name)
+				}
 				return subCommandString, nil
 			}
 		}
 	}
 
 	if strings.EqualFold(command, s.Name) {
+		if s.SubCommandRequired {
+			return "", fmt.Errorf("/%s is not a valid command. Please see /%s help", s.Name, s.Name)
+		}
 		return s.Name, nil
 	}
 
-	return "", errors.New(command + " is not a valid command")
+	return "", fmt.Errorf("/%s is not a valid command. Please see /%s help", command, s.Name)
 }
 
 //Parse parse the command string
