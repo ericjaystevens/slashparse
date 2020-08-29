@@ -328,7 +328,19 @@ func (s *SlashCommand) getCommandString(args string) (commandString string, err 
 		if len(args) >= len(subCommandString) {
 			if strings.EqualFold(args[:len(subCommandString)], subCommandString) {
 				if subCommand.SubCommandRequired {
-					return "", fmt.Errorf("/%s is not a valid command. Please see /%s help", subCommandString, s.Name)
+					var requiredSubCommands []string
+
+					for _, requiredSubCommand := range subCommand.SubCommands {
+						requiredSubCommands = append(requiredSubCommands, requiredSubCommand.Name)
+					}
+
+					if len(requiredSubCommands) > 2 {
+						return "", fmt.Errorf("/%s requires an additional command. Try adding %s, or %s. Please see /%s help for more info", subCommandString, strings.Join(requiredSubCommands[:len(requiredSubCommands)-1], ", "), requiredSubCommands[len(requiredSubCommands)-1], s.Name)
+					}
+					if len(requiredSubCommands) > 1 {
+						return "", fmt.Errorf("/%s requires an additional command. Try adding %s or %s. Please see /%s help for more info", subCommandString, requiredSubCommands[0], requiredSubCommands[1], s.Name)
+					}
+					return "", fmt.Errorf("/%s requires an additional command. Try adding %s. Please see /%s help for more info", subCommandString, requiredSubCommands[0], s.Name)
 				}
 				return subCommandString, nil
 			}

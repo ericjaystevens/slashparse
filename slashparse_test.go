@@ -371,13 +371,19 @@ func TestParse(t *testing.T) {
 			testName:      "missing required subsubcommand",
 			commandString: "/wrangler list",
 			slashDef:      wranglerDef,
-			wantError:     errors.New("/wrangler list is not a valid command. Please see /wrangler help"),
+			wantError:     errors.New("/wrangler list requires an additional command. Try adding channels or messages. Please see /wrangler help for more info"),
 		},
 		{
 			testName:      "missing required subcommand",
 			commandString: "/wrangler",
 			slashDef:      wranglerDef,
 			wantError:     errors.New("/wrangler is not a valid command. Please see /wrangler help"),
+		},
+		{
+			testName:      "invalid required subcommand",
+			commandString: "/wrangler move invalid",
+			slashDef:      wranglerDef,
+			wantError:     errors.New("/wrangler move requires an additional command. Try adding thread. Please see /wrangler help for more info"),
 		},
 	}
 
