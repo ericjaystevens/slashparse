@@ -16,18 +16,18 @@ subcommands:
             description: The ID of the message to be moved
             argtype: text
             requred: true
-            shortname: m
+            shortName: m
             position: 0
           - name: channelID
             description: The ID of the channel where the message will be moved to
             argtype: text
             requred: true
-            shortname: c
+            shortName: c
             position: 1
           - name: show-root-message-in-summary
             description: Include the root message in the summary
             argtype: switch
-            shortname: ir
+            shortName: ir
   - name: copy
     description: Copy messages
     subCommandRequired: true
@@ -39,13 +39,13 @@ subcommands:
             description: The ID of the message to be coppied
             argtype: text
             requred: true
-            shortname: m
+            shortName: m
             position: 0
           - name: channelID
             description: The ID of the channel where the message will be copied to
             argtype: text
             requred: true
-            shortname: c
+            shortName: c
             position: 1
   - name: attach
     description: Attach messages
@@ -58,13 +58,13 @@ subcommands:
             description: The ID of the message to be attached
             argtype: text
             requred: true
-            shortname: m
+            shortName: m
             position: 0
           - name: RootMessageID
             description: The root message ID of the thread
             argtype: text
             requred: true
-            shortname: r
+            shortName: r
             position: 1
   - name: list
     description: Lists IDs for channels and messages
@@ -90,7 +90,7 @@ subcommands:
             description: Number of messages to return. Must be between 1 and 100 (default 20)
             argType: number
             default: 20
-            shortname: c
+            shortName: c
             position: 0
           - name: trim-length
             argType: number

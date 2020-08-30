@@ -215,8 +215,13 @@ func (s *SlashCommand) getNamedArgValues(commandString, argString string) (m map
 				argumentName = splitArg[2:]
 			}
 		} else if strings.HasPrefix(splitArg, "-") {
-			argument, _ := s.getArgumentFromShortName(commandString, splitArg[1:])
-			argumentName = argument.Name
+			isSwitch, arg := s.findMatchingSwitch(commandString, splitArg[1:])
+			if isSwitch {
+				m[arg.Name] = "on"
+			} else {
+				argument, _ := s.getArgumentFromShortName(commandString, splitArg[1:])
+				argumentName = argument.Name
+			}
 		}
 	}
 
@@ -229,9 +234,10 @@ func (s *SlashCommand) findMatchingSwitch(commandString string, potentialSwitch 
 	if strings.EqualFold(commandString, s.Name) {
 		for _, arg := range s.Arguments {
 			if arg.ArgType == "switch" {
-				if strings.EqualFold(arg.Name, potentialSwitch) {
+				if (strings.EqualFold(arg.Name, potentialSwitch)) || (strings.EqualFold(arg.ShortName, potentialSwitch)) {
 					return true, arg
 				}
+
 			}
 		}
 	}
@@ -239,7 +245,7 @@ func (s *SlashCommand) findMatchingSwitch(commandString string, potentialSwitch 
 	subCommand, _ := s.getSubCommand(commandString)
 	for _, arg := range subCommand.Arguments {
 		if arg.ArgType == "switch" {
-			if strings.EqualFold(arg.Name, potentialSwitch) {
+			if (strings.EqualFold(arg.Name, potentialSwitch)) || (strings.EqualFold(arg.ShortName, potentialSwitch)) {
 				return true, arg
 			}
 		}

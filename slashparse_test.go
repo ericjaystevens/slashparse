@@ -392,6 +392,13 @@ func TestParse(t *testing.T) {
 			wantCommandString: "wrangler move thread",
 			wantValues:        map[string]string{"messageID": "123", "channelID": "321", "show-root-message-in-summary": "on"},
 		},
+		{
+			testName:          "short switch on",
+			commandString:     "/wrangler move thread 123 321 -ir",
+			slashDef:          wranglerDef,
+			wantCommandString: "wrangler move thread",
+			wantValues:        map[string]string{"messageID": "123", "channelID": "321", "show-root-message-in-summary": "on"},
+		},
 	}
 
 	for _, test := range tests {
