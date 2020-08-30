@@ -38,7 +38,7 @@ type SlashCommand struct {
 	Description        string       `yaml:"description" json:"description"`
 	Arguments          []Argument   `yaml:"arguments" json:"arguments,omitempty"`
 	SubCommands        []SubCommand `yaml:"subcommands" json:"subcommands,omitempty"`
-	handler            func(map[string]string) (string, error)
+	handler            func(map[string]string, interface{}) (message string, user error, system error)
 	SubCommandRequired bool `yaml:"subCommandRequired" json:"subCommandRequired"`
 }
 
@@ -49,7 +49,7 @@ type SubCommand struct {
 	Arguments          []Argument   `yaml:"arguments" json:"arguments"`
 	SubCommands        []SubCommand `yaml:"subcommands" json:"subcommands"`
 	commandPaths       []string
-	handler            func(map[string]string) (string, error)
+	handler            func(map[string]string, interface{}) (message string, user error, system error)
 	SubCommandRequired bool `yaml:"subCommandRequired" json:"subCommandRequired"`
 }
 
@@ -86,7 +86,9 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 		Name:         "help",
 		Description:  "Display help.",
 		commandPaths: []string{s.Name + " help"},
-		handler:      func(args map[string]string) (string, error) { return s.GetSlashHelp(), nil },
+		handler: func(args map[string]string, item interface{}) (string, error, error) {
+			return s.GetSlashHelp(), nil, nil
+		},
 	}
 	s.SubCommands = append(s.SubCommands, helpSubcommand)
 	return s, nil
@@ -101,7 +103,7 @@ func (s *SubCommand) getCommandPath() string {
 }
 
 // SetHandler sets the function that should be called based on the set of slash command and subcommands
-func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string) (string, error)) error {
+func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]string, interface{}) (string, error, error)) error {
 
 	if strings.EqualFold(commandString, s.Name) {
 		s.handler = handler
@@ -124,23 +126,23 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 	return nil
 }
 
-func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error) {
+func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error, error) {
 	if strings.EqualFold(commandString, s.Name) {
 		if s.handler != nil {
-			return s.handler(args)
+			return s.handler(args, nil)
 		}
-		return "", errors.New("No handler set")
+		return "", errors.New("No handler set"), errors.New("No handler set")
 	}
 
 	subCommand, err := s.getSubCommand(commandString)
 	if err != nil {
-		return "", err
+		return "", err, err
 	}
 
 	if subCommand.handler != nil {
-		return subCommand.handler(args)
+		return subCommand.handler(args, nil)
 	}
-	return "", errors.New("No handler set")
+	return "", errors.New("No handler set"), errors.New("No handler set")
 }
 
 //GetSlashHelp returns a markdown formated help for a slash command
@@ -411,14 +413,14 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 }
 
 //Execute parses and runs the configured handler to process your command.
-func (s *SlashCommand) Execute(slashString string) (string, error) {
+func (s *SlashCommand) Execute(slashString string) (string, error, error) {
 	commandString, values, err := s.Parse(slashString)
 	if err != nil {
-		return err.Error(), err
+		return err.Error(), err, err
 	}
 
-	msg, err := s.invokeHandler(commandString, values)
-	return msg, err
+	msg, err, _ := s.invokeHandler(commandString, values)
+	return msg, err, err
 }
 
 //GetPositionalArgs takes a string of arguments and splits it up by spaces and double quotes

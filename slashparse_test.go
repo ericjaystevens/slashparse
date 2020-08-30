@@ -460,8 +460,8 @@ func TestValidateSlashDefinition(t *testing.T) {
 func TestSetHandler(t *testing.T) {
 	newSlash, _ := NewSlashCommand(SimpleDef)
 	commandString, _, _ := newSlash.Parse("/print reverse pickle")
-	myHandler := func(args map[string]string) (string, error) {
-		return "reverseHandler called with text set as " + args["text"], nil
+	myHandler := func(args map[string]string, items interface{}) (string, error, error) {
+		return "reverseHandler called with text set as " + args["text"], nil, nil
 	}
 
 	got := newSlash.SetHandler(commandString, myHandler)
@@ -474,7 +474,7 @@ type invokeHandlerTests struct {
 	commandString string
 	slashDef      []byte
 	want          string
-	handler       func(map[string]string) (string, error)
+	handler       func(map[string]string, interface{}) (string, error, error)
 }
 
 func TestInvokeHandler(t *testing.T) {
@@ -485,8 +485,8 @@ func TestInvokeHandler(t *testing.T) {
 			commandString: "/print quote",
 			slashDef:      SimpleDef,
 			want:          "quoteHandler called",
-			handler: func(args map[string]string) (string, error) {
-				return "quoteHandler called", nil
+			handler: func(args map[string]string, item interface{}) (string, error, error) {
+				return "quoteHandler called", nil, nil
 			},
 		},
 		{
@@ -494,8 +494,8 @@ func TestInvokeHandler(t *testing.T) {
 			commandString: "/print reverse pickle",
 			slashDef:      SimpleDef,
 			want:          "reverseHandler called with text set as pickle",
-			handler: func(args map[string]string) (string, error) {
-				return "reverseHandler called with text set as " + args["text"], nil
+			handler: func(args map[string]string, item interface{}) (string, error, error) {
+				return "reverseHandler called with text set as " + args["text"], nil, nil
 			},
 		},
 	}
@@ -506,7 +506,7 @@ func TestInvokeHandler(t *testing.T) {
 			commandString, values, _ := newSlash.Parse(test.commandString)
 
 			_ = newSlash.SetHandler(commandString, test.handler)
-			got, _ := newSlash.invokeHandler(commandString, values)
+			got, _, _ := newSlash.invokeHandler(commandString, values)
 
 			assert.Equal(t, test.want, got)
 		})
@@ -515,7 +515,7 @@ func TestInvokeHandler(t *testing.T) {
 	t.Run("invoke without setting handler", func(t *testing.T) {
 		newSlash, _ := NewSlashCommand(SimpleDef)
 		commandString, values, _ := newSlash.Parse("/print reverse pick")
-		_, err := newSlash.invokeHandler(commandString, values)
+		_, err, _ := newSlash.invokeHandler(commandString, values)
 
 		assert.EqualError(t, err, "No handler set")
 	})
@@ -580,19 +580,19 @@ func TestExecute(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			newSlash, _ := NewSlashCommand(test.slashDef)
 
-			newSlash.SetHandler("print quote author", func(args map[string]string) (string, error) {
-				return "quoteAuthorHandler called with authorName set as " + args["authorName"], nil
+			newSlash.SetHandler("print quote author", func(args map[string]string, item interface{}) (string, error, error) {
+				return "quoteAuthorHandler called with authorName set as " + args["authorName"], nil, nil
 			})
 
-			newSlash.SetHandler("print reverse", func(args map[string]string) (string, error) {
-				return "reverseHandler called with text set as " + args["text"], nil
+			newSlash.SetHandler("print reverse", func(args map[string]string, item interface{}) (string, error, error) {
+				return "reverseHandler called with text set as " + args["text"], nil, nil
 			})
 
-			newSlash.SetHandler("print", func(args map[string]string) (string, error) {
-				return "print called with argument " + args["text"], nil
+			newSlash.SetHandler("print", func(args map[string]string, item interface{}) (string, error, error) {
+				return "print called with argument " + args["text"], nil, nil
 			})
 
-			got, _ := newSlash.Execute(test.commandString)
+			got, _, _ := newSlash.Execute(test.commandString)
 			assert.Equal(t, test.want, got)
 
 		})
@@ -618,7 +618,7 @@ func TestGetSubCommand(t *testing.T) {
 func TestGetSlashHelp(t *testing.T) {
 	newSlash, _ := NewSlashCommand(SimpleDef)
 	commandString := "print help"
-	got, _ := newSlash.Execute(commandString)
+	got, _, _ := newSlash.Execute(commandString)
 
 	//just test the first line, to avoid so this doesn't have to be maintained while features are changeing so rapidly
 	firstLine := strings.Split(got, "\n")[0]

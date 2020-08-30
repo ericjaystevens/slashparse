@@ -60,7 +60,7 @@ subcommands:
             requred: true
             shortName: m
             position: 0
-          - name: RootMessageID
+          - name: rootMessageID
             description: The root message ID of the thread
             argtype: text
             requred: true
