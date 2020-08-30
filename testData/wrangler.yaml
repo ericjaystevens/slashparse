@@ -24,6 +24,10 @@ subcommands:
             requred: true
             shortname: c
             position: 1
+          - name: show-root-message-in-summary
+            description: Include the root message in the summary
+            argtype: switch
+            shortname: ir
   - name: copy
     description: Copy messages
     subCommandRequired: true

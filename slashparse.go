@@ -196,6 +196,7 @@ func (s *SlashCommand) getValues(CommandAndArgs string) (map[string]string, erro
 
 }
 
+//getNamedArgValues gets named arguments and switches into a map of strings
 func (s *SlashCommand) getNamedArgValues(commandString, argString string) (m map[string]string) {
 	m = make(map[string]string)
 
@@ -207,7 +208,12 @@ func (s *SlashCommand) getNamedArgValues(commandString, argString string) (m map
 			argumentName = ""
 		}
 		if strings.HasPrefix(splitArg, "--") {
-			argumentName = splitArg[2:]
+			isSwitch, arg := s.findMatchingSwitch(commandString, splitArg[2:])
+			if isSwitch {
+				m[arg.Name] = "on"
+			} else {
+				argumentName = splitArg[2:]
+			}
 		} else if strings.HasPrefix(splitArg, "-") {
 			argument, _ := s.getArgumentFromShortName(commandString, splitArg[1:])
 			argumentName = argument.Name
@@ -215,6 +221,32 @@ func (s *SlashCommand) getNamedArgValues(commandString, argString string) (m map
 	}
 
 	return m
+}
+
+//pass in potential switch without -- or -
+func (s *SlashCommand) findMatchingSwitch(commandString string, potentialSwitch string) (bool, Argument) {
+
+	if strings.EqualFold(commandString, s.Name) {
+		for _, arg := range s.Arguments {
+			if arg.ArgType == "switch" {
+				if strings.EqualFold(arg.Name, potentialSwitch) {
+					return true, arg
+				}
+			}
+		}
+	}
+
+	subCommand, _ := s.getSubCommand(commandString)
+	for _, arg := range subCommand.Arguments {
+		if arg.ArgType == "switch" {
+			if strings.EqualFold(arg.Name, potentialSwitch) {
+				return true, arg
+			}
+		}
+	}
+
+	return false, Argument{}
+
 }
 
 // getArgumentFromShortName returns an argument that matches the shortname
@@ -280,10 +312,10 @@ func (s *SlashCommand) getArgsValues(commandString string, argString string, com
 			}
 		}
 	}
-
 	if len(missingArgs) > 0 {
 		return m, getMissingArgError(missingArgs, slashCommandName)
 	}
+
 	return m, nil
 }
 

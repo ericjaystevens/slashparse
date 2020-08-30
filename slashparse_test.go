@@ -385,6 +385,13 @@ func TestParse(t *testing.T) {
 			slashDef:      wranglerDef,
 			wantError:     errors.New("/wrangler move requires an additional command. Try adding thread. Please see /wrangler help for more info"),
 		},
+		{
+			testName:          "switch on",
+			commandString:     "/wrangler move thread 123 321 --show-root-message-in-summary",
+			slashDef:          wranglerDef,
+			wantCommandString: "wrangler move thread",
+			wantValues:        map[string]string{"messageID": "123", "channelID": "321", "show-root-message-in-summary": "on"},
+		},
 	}
 
 	for _, test := range tests {
