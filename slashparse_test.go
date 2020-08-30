@@ -592,7 +592,7 @@ func TestExecute(t *testing.T) {
 				return "print called with argument " + args["text"], nil, nil
 			})
 
-			got, _, _ := newSlash.Execute(test.commandString)
+			got, _, _ := newSlash.Execute(test.commandString, nil)
 			assert.Equal(t, test.want, got)
 
 		})
@@ -618,7 +618,7 @@ func TestGetSubCommand(t *testing.T) {
 func TestGetSlashHelp(t *testing.T) {
 	newSlash, _ := NewSlashCommand(SimpleDef)
 	commandString := "print help"
-	got, _, _ := newSlash.Execute(commandString)
+	got, _, _ := newSlash.Execute(commandString, nil)
 
 	//just test the first line, to avoid so this doesn't have to be maintained while features are changeing so rapidly
 	firstLine := strings.Split(got, "\n")[0]

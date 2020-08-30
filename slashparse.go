@@ -413,7 +413,7 @@ func (s *SlashCommand) Parse(slashString string) (string, map[string]string, err
 }
 
 //Execute parses and runs the configured handler to process your command.
-func (s *SlashCommand) Execute(slashString string) (string, error, error) {
+func (s *SlashCommand) Execute(slashString string, item interface{}) (string, error, error) {
 	commandString, values, err := s.Parse(slashString)
 	if err != nil {
 		return err.Error(), err, err
