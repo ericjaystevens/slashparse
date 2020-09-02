@@ -509,5 +509,5 @@ func (s *SlashCommand) getSubCommand(commandString string) (SubCommand, error) {
 			}
 		}
 	}
-	return SubCommand{}, errors.New("Unable to find mathing subcommand")
+	return SubCommand{}, errors.New("Unable to find matching subcommand")
 }
