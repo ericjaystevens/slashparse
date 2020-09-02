@@ -126,10 +126,10 @@ func (s *SlashCommand) SetHandler(commandString string, handler func(map[string]
 	return nil
 }
 
-func (s *SlashCommand) invokeHandler(commandString string, args map[string]string) (string, error, error) {
+func (s *SlashCommand) invokeHandler(commandString string, args map[string]string, item interface{}) (string, error, error) {
 	if strings.EqualFold(commandString, s.Name) {
 		if s.handler != nil {
-			return s.handler(args, nil)
+			return s.handler(args, item)
 		}
 		return "", errors.New("No handler set"), errors.New("No handler set")
 	}
@@ -140,7 +140,7 @@ func (s *SlashCommand) invokeHandler(commandString string, args map[string]strin
 	}
 
 	if subCommand.handler != nil {
-		return subCommand.handler(args, nil)
+		return subCommand.handler(args, item)
 	}
 	return "", errors.New("No handler set"), errors.New("No handler set")
 }
@@ -419,7 +419,7 @@ func (s *SlashCommand) Execute(slashString string, item interface{}) (string, er
 		return err.Error(), err, err
 	}
 
-	msg, err, _ := s.invokeHandler(commandString, values)
+	msg, err, _ := s.invokeHandler(commandString, values, item)
 	return msg, err, err
 }
 

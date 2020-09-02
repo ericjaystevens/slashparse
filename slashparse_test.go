@@ -506,7 +506,7 @@ func TestInvokeHandler(t *testing.T) {
 			commandString, values, _ := newSlash.Parse(test.commandString)
 
 			_ = newSlash.SetHandler(commandString, test.handler)
-			got, _, _ := newSlash.invokeHandler(commandString, values)
+			got, _, _ := newSlash.invokeHandler(commandString, values, nil)
 
 			assert.Equal(t, test.want, got)
 		})
@@ -515,7 +515,7 @@ func TestInvokeHandler(t *testing.T) {
 	t.Run("invoke without setting handler", func(t *testing.T) {
 		newSlash, _ := NewSlashCommand(SimpleDef)
 		commandString, values, _ := newSlash.Parse("/print reverse pick")
-		_, err, _ := newSlash.invokeHandler(commandString, values)
+		_, err, _ := newSlash.invokeHandler(commandString, values, nil)
 
 		assert.EqualError(t, err, "No handler set")
 	})
