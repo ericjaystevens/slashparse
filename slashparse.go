@@ -65,7 +65,12 @@ func NewSlashCommand(slashDef []byte) (s SlashCommand, err error) {
 		return s, unmarshalErr
 	}
 
-	validationErr := validateSlashDefinition(&s)
+	return InitSlashCommand(s)
+}
+
+//InitSlashCommand initializes the provided slash command
+func InitSlashCommand(s SlashCommand) (SlashCommand, error) {
+	validationErr := validateSlashDefinition(s)
 	if validationErr != nil {
 		return s, validationErr
 	}
