@@ -21,7 +21,7 @@ This is in the proof of concept stages of development, expect frequent breaking 
 
 You can use the provided Schema (schema.json), to validate and get autocomplete in your text editor.
 
-```
+```yaml
 ---
 name: Print
 description: Echos back what you type.
@@ -55,7 +55,7 @@ subcommands:
 
 #### setup slashParse on load of your application
 
-```
+```go
 package main
 
 import com.gitlab.ericjaystevens.slashparse
@@ -81,7 +81,7 @@ func (p *plugin) OnActivate() Error {
 
 #### Use slashparse to parse the incoming slash command 
 
-```
+```go
 func (p *Plugin) ExecuteCommand(command string) (string, error) {
 	msg, err := p.slashCommand.Execute(command)
 
@@ -96,7 +96,7 @@ func (p *Plugin) ExecuteCommand(command string) (string, error) {
 
 use ```values[argumentName]``` to reference an argument's value, and you don't need to validate it exists if its required.
 
-```
+```go
 func executePrint(values map[string]string) (msg string, err error) {
 
 	msg = "you want my to say what? ...  " + values["text"]
@@ -104,7 +104,7 @@ func executePrint(values map[string]string) (msg string, err error) {
 }
 ```
 
-```
+```go
 func executePrintQuoteRandom(values map[string]string) (msg string, err error) {
 
 	msg = "print a random quote"
@@ -112,7 +112,7 @@ func executePrintQuoteRandom(values map[string]string) (msg string, err error) {
 }
 ```
 
-```
+```go
 func executePrintQuoteAuthor(values map[string]string) (msg string, err error) {
 
 	msg = "Print a random quote from " + values["authorName"]
